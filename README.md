@@ -66,5 +66,18 @@ $ apache2nginx -f /etc/httpd/conf/httpd.conf
 Now, if it’s ok, nginx.conf will been produced.
 By default, the converting result file is nginx.conf which is in the current directory.
 
+## Docs & Help
+1. Manual: [PDF File Download](https://github.com/downloads/nhnc-nginx/apache2nginx/apache2nginx_manual.pdf)
+2. Supported Modules [apache_module_support.pdf](https://github.com/downloads/nhnc-nginx/apache2nginx/apache_module_support.pdf)
+3. Module and Directive Mapping [module_directive_mapping.pdf](http://cloud.github.com/downloads/nhnc-nginx/apache2nginx/module_directive_mapping.pdf)
+
+## Disclaimer of Liability
+THE AUTHOR(S) OF APACHE2NGINX SOFTWARE IS NOT LIABLE FOR ANY DAMAGES SUFFERED AS A RESULT OF USING, MODIFYING, CONTRIBUTING, OR COPYING THE SOFTWARE. THE AUTHOR(S) OF APACHE2NGINX SOFTWARE IS ALSO NOT LIABLE FOR ANY INDIRECT, INCIDENTAL, PUNITIVE, SPECIAL OR CONSEQUENTIAL DAMAGE (INCLUDING LOSS OF BUSINESS, REVENUE, PROFITS, USE, DATA OR OTHER ECONOMIC ADVANTAGE).
+
+THE FUNCTION PROVIDED BY THIS TOOL CAN'T BE GUARANTEED AND ASSURED TO BE ACCURATE. THE PURPOSE OF DESIGNING THIS SOFTWARE IS TO HELP USERS EASILY CONVERTING THE APACHE CONFIGURATION FILES TO NGINX'S. USER SHOULD CHECK WHETHER THE CONVERTED RESULT IS EFFECTIVE OR NOT BEFORE USING IN THE PRODUCTION ENVIRONMENT.
+
+THE APACHE2NGINX SOFTWARE CONVERTS THE APACHE CONFIGURATION FILES ACCORDING TO THE FUNCTION OF APACHE MODULES NOT THE DIRECTIVES. SO THERE AREN’T THE 1 TO 1 RELATIONS BETWEEN THE APACHE DIRECTIVES TO NGINX DIRECTIVES.
+
+
 
 
