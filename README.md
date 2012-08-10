@@ -10,41 +10,47 @@ However, like Apache, the configuration of NGINX is not an easy thing for most o
 
 According to the above requirement, we developed the apache2nginx tool. The goal of this tool is generating Nginx configuration file(s) according to those of Apache. 
 
-## Installation
+## Download and Installation 
 
-Step 1: Change to your directory, for example, /opt
+You could download source code or binary file (i386 or x86_64) to use.
+
+### Download Binary 
 
 ```bash
-$ cd /opt
+$ wget https://github.com/downloads/nhnc-nginx/apache2nginx/apache2nginx-1.0.0-bin.i386.tar.bz2
+$ tar jxvf apache2nginx-1.0.0-bin.i386.tar.bz2
+```
+Now you will get the executable file apache2nginx.
+
+you can by follow command to try use.
+
+```bash
+$ ./apache2nginx -h
 ```
 
-Step 2: Download and unzip source code to the above directory.
+### Download Source Code
+
+Step 1: Download and unzip source code to the above directory.
 
 ```bash
 $ wget https://github.com/nhnc-nginx/apache2nginx/zipball/master
 $ unzip nhnc-nginx-apache2nginx.zip
 ```
 
-Step 3: Configure: you could change the PREFIX by --prefix option for the installation directory
+Step 2: Configure: you could change the PREFIX by --prefix option for the installation directory
 
 ```bash
 $ cd nhnc-nginx-apache2nginx
 $ ./configure --prefix=/usr/local/apache2nginx
 ```
 
-Step 4: Compile:
+Step 3: Compile and install
 
 ```bash
-$ make
+$ make && make install
 ```
 
-Step 5: Install:
-
-```bash
-$ make install
-```
-
-Step6: Add apache2nginx to PATH environment variable.
+Step 4: Add apache2nginx to PATH environment variable.
 ```bash
 $ export PATH=/usr/local/apache2nginx/bin:$PATH
 ```
