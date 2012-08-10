@@ -14,8 +14,6 @@ PROGRAM_DEPENDENCIES = \
 
 PROGRAMS        = $(PROGRAM_NAME)
 TARGETS         = $(PROGRAMS) $(shared_build) $(other_targets)
-#INSTALL_TARGETS = install-error install-other install-include install-build
-INSTALL_TARGETS = install-other 
 
 DISTCLEAN_TARGETS  = include/ap_config_auto.h include/ap_config_layout.h \
 	modules.c config.cache config.log config.status build/config_vars.mk \
@@ -31,71 +29,8 @@ include $(top_srcdir)/build/program.mk
 build/config_vars.out: build/config_vars.mk
 	@$(SHELL) build/config_vars.sh < build/config_vars.mk > build/config_vars.out
 
-install-build: build/config_vars.out
-	@echo Installing build system files 
-	@$(MKINSTALLDIRS) $(DESTDIR)$(installbuilddir) 
-	@for f in $(top_srcdir)/build/*.mk build/*.mk; do \
-	 $(INSTALL_DATA) $$f $(DESTDIR)$(installbuilddir); \
-	done
-	@for f in $(top_builddir)/config.nice \
-		  $(top_srcdir)/build/mkdir.sh \
-		  $(top_srcdir)/build/instdso.sh; do \
-	 $(INSTALL_PROGRAM) $$f $(DESTDIR)$(installbuilddir); \
-	done
-	@$(INSTALL_DATA) build/config_vars.out $(DESTDIR)$(installbuilddir)/config_vars.mk
-	@rm build/config_vars.out
-
 dox:
 	doxygen $(top_srcdir)/docs/doxygen.conf
-
-install-error:
-	-@if [ -d $(DESTDIR)$(errordir) ]; then \
-           echo "[PRESERVING EXISTING ERROR SUBDIR: $(DESTDIR)$(errordir)]"; \
-        else \
-	    echo Installing error documents ; \
-	    $(MKINSTALLDIRS) $(DESTDIR)$(errordir) ; \
-	    cd $(top_srcdir)/docs/error && cp -rp * $(DESTDIR)$(errordir) ; \
-	    test "x$(errordir)" != "x" && cd $(DESTDIR)$(errordir) && find . -name ".svn" -type d -print | xargs rm -rf 2>/dev/null || true; \
-	fi
-
-install-other:
-	@test -d $(DESTDIR)$(logfiledir) || $(MKINSTALLDIRS) $(DESTDIR)$(logfiledir)
-	@test -d $(DESTDIR)$(runtimedir) || $(MKINSTALLDIRS) $(DESTDIR)$(runtimedir)
-	@for ext in dll x; do \
-		file=apachecore.$$ext; \
-		if test -f $$file; then \
-			cp -p $$file $(DESTDIR)$(libdir); \
-		fi; \
-	done; \
-	file=httpd.dll; \
-	if test -f $$file; then \
-		cp -p $$file $(DESTDIR)$(bindir); \
-	fi;
-
-INSTALL_HEADERS = \
-	include/*.h \
-	$(srcdir)/include/*.h \
-	$(srcdir)/os/$(OS_DIR)/os.h \
-	$(srcdir)/server/mpm/$(MPM_SUBDIR_NAME)/*.h \
-	$(srcdir)/modules/aaa/mod_auth.h \
-	$(srcdir)/modules/database/mod_dbd.h \
-	$(srcdir)/modules/dav/main/mod_dav.h \
-	$(srcdir)/modules/filters/mod_include.h \
-	$(srcdir)/modules/generators/mod_cgi.h \
-	$(srcdir)/modules/generators/mod_status.h \
-	$(srcdir)/modules/loggers/mod_log_config.h \
-	$(srcdir)/modules/http/mod_core.h \
-	$(srcdir)/modules/mappers/mod_rewrite.h \
-	$(srcdir)/modules/proxy/mod_proxy.h \
-	$(srcdir)/modules/ssl/mod_ssl.h \
-	$(srcdir)/os/$(OS_DIR)/*.h
-
-install-include:
-	@echo Installing header files
-	@$(MKINSTALLDIRS) $(DESTDIR)$(includedir)
-	@for hdr in $(INSTALL_HEADERS); do \
-	  $(INSTALL_DATA) $$hdr $(DESTDIR)$(includedir); \
-	done
 
 x-local-distclean:
 	@rm -rf autom4te.cache

@@ -2809,6 +2809,10 @@ AP_DECLARE(int) apn_walk_dir_config(apr_pool_t *p,
     return APR_SUCCESS;
 }
 
+/** for some directives, the position need to adjust,
+ * here, just move the directive to parent->prev if set need_fixup,
+ * if parent->prev is server, we should move to previous of first server.
+ */
 static int apn_fixup_module_config(apr_pool_t *pool, apn_node_t *s)
 {
     apr_array_header_t *directives 
@@ -2828,7 +2832,15 @@ static int apn_fixup_module_config(apr_pool_t *pool, apn_node_t *s)
                 apn_error("fixup failed when remove subtree.");
                 return APR_EGENERAL;
             }
-            subtree = apn_insert_as_next(new_pos, subtree);
+            if( apn_node_is_server(new_pos)) {
+                while(apn_node_is_server(new_pos->prev)) {
+                    new_pos = new_pos->prev;
+                }
+                subtree = apn_insert_as_prev(new_pos, subtree);
+            } else {
+                subtree = apn_insert_as_next(new_pos, subtree);
+            }
+
             if (!subtree){
                 apn_error("fixup failed when insert subtree.");
                 return APR_EGENERAL;
@@ -3166,7 +3178,9 @@ static int apn_checking(apr_pool_t *pool)
     apn_node_t *next = NULL;
     apn_node_t **new;
 
-    /** calculate the sum */
+    /** for those unsupported directives in limit_except,
+     * remove it
+     */
     while(p){
         if( !strcasecmp(p->directive, "limit_except") ){
             next = p->first_child;

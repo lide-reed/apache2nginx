@@ -276,6 +276,9 @@ void *ssl_config_server_merge(apr_pool_t *p, void *basev, void *addv)
     cfgMergeBool(fips);
 #endif
 
+    cfgMergeBool(cmd_SSLEngine);
+    cfgMergeBool(cmd_SSLProtocol);
+
     modssl_ctx_cfg_merge_proxy(base->proxy, add->proxy, mrg->proxy);
 
     modssl_ctx_cfg_merge_server(base->server, add->server, mrg->server);
@@ -637,6 +640,8 @@ const char *ssl_cmd_SSLRandomSeed(cmd_parms *cmd,
 const char *ssl_cmd_SSLEngine(cmd_parms *cmd, void *dcfg, const char *arg)
 {
     SSLSrvConfigRec *sc = mySrvConfig(cmd->server);
+
+    sc->cmd_SSLEngine = TRUE;
 
     if (!strcasecmp(arg, "On")) {
         sc->enabled = SSL_ENABLED_TRUE;
@@ -1363,6 +1368,8 @@ const char *ssl_cmd_SSLProtocol(cmd_parms *cmd,
                                 const char *arg)
 {
     SSLSrvConfigRec *sc = mySrvConfig(cmd->server);
+
+    sc->cmd_SSLProtocol = TRUE;
 
     return ssl_cmd_protocol_parse(cmd, arg, &sc->server->protocol);
 }

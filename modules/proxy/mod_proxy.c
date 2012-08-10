@@ -2507,8 +2507,6 @@ convert_proxy_dir(apr_pool_t *pool, cmd_parms *parms, ap_conf_vector_t* v)
         }
     }
 
-
-
     proxy_dir_conf *dconf = (proxy_dir_conf *)ap_get_module_config(v, &proxy_module);
     if (dconf == NULL) {
         return mod;
@@ -2527,6 +2525,16 @@ convert_proxy_dir(apr_pool_t *pool, cmd_parms *parms, ap_conf_vector_t* v)
 
     return mod;
 }
+
+
+struct upstream_rec_element {
+    char *upstream_name;
+    int num;
+};
+
+/* record the upstream name. */
+static apr_array_header_t *upstream_rec_list = NULL;
+
 
 static void *
 convert_proxy_server(apr_pool_t *pool, cmd_parms *parms, ap_conf_vector_t* v)
@@ -2554,9 +2562,42 @@ convert_proxy_server(apr_pool_t *pool, cmd_parms *parms, ap_conf_vector_t* v)
 
         apn_node_t *new_node = NULL;
 
+        char *upstream_name = NULL;
         char *upstream_args = NULL;
-        upstream_args = apr_pstrcat(pool, balancer->name + strlen("balancer://"), " {", NULL);
+        upstream_name = apr_pstrcat(pool, balancer->name + strlen("balancer://"), NULL);
+
+
+        /* manage the upstream recs */
+        /* create list */
+        if (upstream_rec_list == NULL) {
+            upstream_rec_list = apr_array_make(pool, 2, sizeof(struct upstream_rec_element));
+        }
+
+        /* tranverse the list, get the new availble upstream_name */
+        struct upstream_rec_element *ups;
+        ups = (struct upstream_rec_element *)upstream_rec_list->elts;
+        int i = 0;
+        for (i = 0; i < upstream_rec_list->nelts; i++) {
+            if (upstream_name != NULL && strcmp(ups->upstream_name, upstream_name) == 0) {
+                upstream_name = apr_pstrcat(pool, upstream_name, apr_itoa(pool, ++ups->num), NULL);
+                break;
+            }
+            ups++;
+        }
+
+        /* add the new upstream_rec_elsment into upstream_rec_list */
+        struct upstream_rec_element *new = NULL;
+        new = (struct upstream_rec_element *)apr_array_push(upstream_rec_list);
+        new->upstream_name = upstream_name;
+        new->num = 1;
+
+
+        upstream_args = apr_pstrcat(pool, upstream_name, " {", NULL);
+
         new_node = apn_new_node("upstream", upstream_args);
+        /* upstream block should befor all the server blocks */
+        new_node->need_fixup = 1;
+
         apn_module_t *temp_mod = NULL;
 
         char *maxattempts;

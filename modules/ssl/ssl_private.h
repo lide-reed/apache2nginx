@@ -471,6 +471,10 @@ typedef struct {
 struct SSLSrvConfigRec {
     SSLModConfigRec *mc;
     ssl_enabled_t    enabled;
+
+    BOOL             cmd_SSLEngine;
+    BOOL             cmd_SSLProtocol;
+
     BOOL             proxy_enabled;
     const char      *vhost_id;
     int              vhost_id_len;

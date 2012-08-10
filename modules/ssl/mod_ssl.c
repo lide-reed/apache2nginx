@@ -482,26 +482,29 @@ ssl_convert_server(apr_pool_t *pool, cmd_parms *parms, ap_conf_vector_t* v)
     SSLSrvConfigRec *sconf = ap_get_module_config(v, &ssl_module);
 
     /** SSLEngine */
-    if (sconf->enabled == SSL_ENABLED_TRUE || sconf->enabled == SSL_ENABLED_OPTIONAL) {
-        mod = apn_mod_insert_sibling(mod, "ssl", "on");
-    } else {
-        mod = apn_mod_insert_sibling(mod, "ssl", "off");
-        //return mod;
+    if (sconf->cmd_SSLEngine == TRUE) {
+        if (sconf->enabled == SSL_ENABLED_TRUE || sconf->enabled == SSL_ENABLED_OPTIONAL) {
+            mod = apn_mod_insert_sibling(mod, "ssl", "on");
+        } else {
+            mod = apn_mod_insert_sibling(mod, "ssl", "off");
+        }
     }
 
     /** SSLProtocol */
     char *protocols = "";
-    if (sconf->server->protocol & SSL_PROTOCOL_SSLV2) {
-        protocols = apr_pstrcat(pool, protocols, " SSLv2", NULL);
-    }
-    if (sconf->server->protocol & SSL_PROTOCOL_SSLV3) {
-        protocols = apr_pstrcat(pool, protocols, " SSLv3", NULL);
-    }
-    if (sconf->server->protocol & SSL_PROTOCOL_TLSV1) {
-        protocols = apr_pstrcat(pool, protocols, " TLSv1", NULL);
-    }
-    if (strlen(protocols) != 0) {
-        mod = apn_mod_insert_sibling(mod, "ssl_protocols", protocols+1);
+    if (sconf->cmd_SSLProtocol == TRUE) {
+        if (sconf->server->protocol & SSL_PROTOCOL_SSLV2) {
+            protocols = apr_pstrcat(pool, protocols, " SSLv2", NULL);
+        }
+        if (sconf->server->protocol & SSL_PROTOCOL_SSLV3) {
+            protocols = apr_pstrcat(pool, protocols, " SSLv3", NULL);
+        }
+        if (sconf->server->protocol & SSL_PROTOCOL_TLSV1) {
+            protocols = apr_pstrcat(pool, protocols, " TLSv1", NULL);
+        }
+        if (strlen(protocols) != 0) {
+            mod = apn_mod_insert_sibling(mod, "ssl_protocols", protocols+1);
+        }
     }
 
     /** SSLCACertificateFile */

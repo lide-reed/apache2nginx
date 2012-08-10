@@ -853,6 +853,29 @@ AP_DECLARE(apn_node_t*) apn_get_server_node(int id )
     return NULL;
 }
 
+/** insert subtree as the previous of the node of new_pos. */
+AP_DECLARE(apn_node_t*) apn_insert_as_prev(apn_node_t *new_pos, 
+                                            apn_node_t *subtree)
+{
+    if(!subtree || !new_pos) return NULL;
+
+    apn_node_t *pprev = new_pos->prev;
+
+    new_pos->prev = subtree;
+    subtree->prev = pprev;
+    if(pprev) {
+        pprev->next = subtree;
+    } else {
+        if(new_pos->parent) 
+            new_pos->parent->first_child = subtree;
+    }
+    subtree->parent = new_pos->parent;
+    subtree->next = new_pos;
+    
+    return subtree;
+}
+
+
 /** insert subtree as the next of the node of new_pos. */
 AP_DECLARE(apn_node_t*) apn_insert_as_next(apn_node_t *new_pos, 
                                             apn_node_t *subtree)
@@ -870,6 +893,22 @@ AP_DECLARE(apn_node_t*) apn_insert_as_next(apn_node_t *new_pos,
     return subtree;
 }
 
+
+AP_DECLARE(int) apn_node_is_server(apn_node_t *node )
+{
+    if (!apn_server_list){
+        apn_error("server is not built.\n");
+        return 0;
+    }
+
+    apn_server_t* s = apn_server_list;
+    while(s) {
+        if(s->server == node) return 1;
+        s = s->next;
+    }
+
+    return 0;
+}
 
 
 
@@ -977,21 +1016,6 @@ AP_DECLARE(apn_node_t *) apn_get_last_child( apn_node_t* parent )
     return child;
 }
 
-AP_DECLARE(int) apn_node_is_server(apn_node_t *node )
-{
-    if (!apn_server_list){
-        apn_error("server is not built.\n");
-        return 0;
-    }
-
-    apn_node_t* s = apn_server_list->server;
-    while(s) {
-        if(s == node) return 1;
-        s = s->next;
-    }
-
-    return 0;
-}
-
 #endif
+
 //----------------------- the end of maybe userlee --------------------------

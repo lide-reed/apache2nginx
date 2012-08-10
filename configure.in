@@ -202,7 +202,7 @@ else
   AP_CLEAN_SRCLIB_DIRS="$AP_CLEAN_SRCLIB_DIRS pcre" 
 fi
 
-echo $ac_n "${nl}Configuring Apache httpd ...${nl}"
+echo $ac_n "${nl}Configuring apache2nginx ...${nl}"
 
 dnl If the source dir is not equal to the build dir, 
 dnl then we are running in VPATH mode.

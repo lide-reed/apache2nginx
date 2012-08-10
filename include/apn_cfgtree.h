@@ -138,9 +138,16 @@ AP_DECLARE(int) apn_delete_node(apn_node_t *node);
 
 AP_DECLARE(apn_node_t*) apn_get_server_node(int id );
 
+/** insert subtree as the previous of the node of new_pos. */
+AP_DECLARE(apn_node_t*) apn_insert_as_prev(apn_node_t *new_pos, 
+                                            apn_node_t *subtree);
+
 /** insert subtree as the next of the node of new_pos. */
 AP_DECLARE(apn_node_t*) apn_insert_as_next(apn_node_t *new_pos, 
                                             apn_node_t *subtree);
+
+/** node if or not server node, "server {" */
+AP_DECLARE(int) apn_node_is_server(apn_node_t *node );
 
 // --------------- maybe useless functions 
 #if 0
@@ -150,9 +157,6 @@ AP_DECLARE(int) apn_update_node( const char *directive,
 AP_DECLARE(apn_node_t*) apn_find_node_in_location( const char *directive, 
                     const char *args, int location );
 AP_DECLARE(apn_node_t *) apn_get_last_child( apn_node_t* parent );
-
-/** node if or not server node, "server {" */
-AP_DECLARE(int) apn_node_is_server(apn_node_t *node );
 
 #endif
 // ----------------------------------------
