@@ -67,7 +67,7 @@ Now, if it’s ok, nginx.conf will been produced.
 By default, the converting result file is nginx.conf which is in the current directory.
 
 ## Docs & Help
-1. Manual: [apache2nginx_manual.pdf](https://github.com/downloads/nhnc-nginx/apache2nginx/apache2nginx_manual.pdf)
+1. Manual [apache2nginx_manual.pdf](https://github.com/downloads/nhnc-nginx/apache2nginx/apache2nginx_manual.pdf)
 2. Supported Modules [apache_module_support.pdf](https://github.com/downloads/nhnc-nginx/apache2nginx/apache_module_support.pdf)
 3. Module and Directive Mapping [module_directive_mapping.pdf](http://cloud.github.com/downloads/nhnc-nginx/apache2nginx/module_directive_mapping.pdf)
 
