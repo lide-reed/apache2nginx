@@ -17,8 +17,8 @@ You could download source code or binary file (i386 or x86_64) to use.
 ### Download Binary 
 
 ```bash
-$ wget https://github.com/downloads/nhnc-nginx/apache2nginx/apache2nginx-1.0.0-bin.i386.tar.bz2
-$ tar jxvf apache2nginx-1.0.0-bin.i386.tar.bz2
+$ wget https://github.com/downloads/nhnc-nginx/apache2nginx/apache2nginx-1.0.1-bin.i386.tar.bz2
+$ tar jxvf apache2nginx-1.0.1-bin.i386.tar.bz2
 ```
 Now you will get the executable file apache2nginx.
 
