@@ -2471,6 +2471,15 @@ static void register_hooks(apr_pool_t *p)
 }
 
 
+struct upstream_rec_element {
+    char *old_upstream_name;
+    char *upstream_name;
+    int num;
+    proxy_server_conf *belong_server;
+};
+
+/* record the upstream name. */
+static apr_array_header_t *upstream_rec_list = NULL;
 
 /** 
  * @brief The below codes convert mod_proxy to Ngx configurations.
@@ -2527,15 +2536,6 @@ convert_proxy_dir(apr_pool_t *pool, cmd_parms *parms, ap_conf_vector_t* v)
 }
 
 
-struct upstream_rec_element {
-    char *upstream_name;
-    int num;
-};
-
-/* record the upstream name. */
-static apr_array_header_t *upstream_rec_list = NULL;
-
-
 static void *
 convert_proxy_server(apr_pool_t *pool, cmd_parms *parms, ap_conf_vector_t* v)
 {
@@ -2563,8 +2563,10 @@ convert_proxy_server(apr_pool_t *pool, cmd_parms *parms, ap_conf_vector_t* v)
         apn_node_t *new_node = NULL;
 
         char *upstream_name = NULL;
+        char *old_upstream_name = NULL;
         char *upstream_args = NULL;
-        upstream_name = apr_pstrcat(pool, balancer->name + strlen("balancer://"), NULL);
+        old_upstream_name = apr_pstrcat(pool, balancer->name + strlen("balancer://"), NULL);
+        upstream_name = old_upstream_name;
 
 
         /* manage the upstream recs */
@@ -2577,9 +2579,12 @@ convert_proxy_server(apr_pool_t *pool, cmd_parms *parms, ap_conf_vector_t* v)
         struct upstream_rec_element *ups;
         ups = (struct upstream_rec_element *)upstream_rec_list->elts;
         int i = 0;
+        int duplicate = 0; // not duplicate.
         for (i = 0; i < upstream_rec_list->nelts; i++) {
             if (upstream_name != NULL && strcmp(ups->upstream_name, upstream_name) == 0) {
-                upstream_name = apr_pstrcat(pool, upstream_name, apr_itoa(pool, ++ups->num), NULL);
+                //upstream_name = apr_pstrcat(pool, upstream_name, apr_itoa(pool, ups->num + 1), NULL);
+                duplicate = 1;
+                ups->num ++;
                 break;
             }
             ups++;
@@ -2587,9 +2592,13 @@ convert_proxy_server(apr_pool_t *pool, cmd_parms *parms, ap_conf_vector_t* v)
 
         /* add the new upstream_rec_elsment into upstream_rec_list */
         struct upstream_rec_element *new = NULL;
-        new = (struct upstream_rec_element *)apr_array_push(upstream_rec_list);
-        new->upstream_name = upstream_name;
-        new->num = 1;
+        if (duplicate == 0) {
+            new = (struct upstream_rec_element *)apr_array_push(upstream_rec_list);
+            new->old_upstream_name = old_upstream_name;
+            new->upstream_name = upstream_name;
+            new->num = 0;
+            new->belong_server = conf;
+        }
 
 
         upstream_args = apr_pstrcat(pool, upstream_name, " {", NULL);
@@ -2597,6 +2606,7 @@ convert_proxy_server(apr_pool_t *pool, cmd_parms *parms, ap_conf_vector_t* v)
         new_node = apn_new_node("upstream", upstream_args);
         /* upstream block should befor all the server blocks */
         new_node->need_fixup = 1;
+        new_node->comment = "This upstream name is duplicate with another one. Please check.";
 
         apn_module_t *temp_mod = NULL;
 

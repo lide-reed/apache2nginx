@@ -122,9 +122,6 @@ static void usage(process_rec *process)
                  "Version: "APN_PROGRAM_INFO);
 
     ap_log_error(APLOG_MARK, APLOG_STARTUP, 0, NULL,
-                 "Copyright: Copyright (C) 2012-2022 NHN China.");
-
-    ap_log_error(APLOG_MARK, APLOG_STARTUP, 0, NULL,
                  " ");
 
     ap_log_error(APLOG_MARK, APLOG_STARTUP, 0, NULL,

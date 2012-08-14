@@ -69,8 +69,8 @@ extern "C" {
 #endif
 
 #define APN_PROGRAM_NAME "Apache2Nginx"
-#define APN_PROGRAM_VERSION "1.0.0"
-#define APN_PROGRAM_DATE "10 Aug 2012"
+#define APN_PROGRAM_VERSION "1.0.1"
+#define APN_PROGRAM_DATE "Aug 14, 2012"
 #define APN_PROGRAM_INFO \
     APN_PROGRAM_NAME" "APN_PROGRAM_VERSION" " APN_PROGRAM_DATE
 

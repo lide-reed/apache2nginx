@@ -3271,7 +3271,7 @@ static void apn_conf_file_printf(apr_pool_t *p,
     }while (retval);
     newstr = apr_pstrcat(p, newstr, "\n", NULL);
 
-    apr_file_printf(f, newstr);
+    apr_file_printf(f, "%s", newstr);
 }
 
 static int apn_output_statistics(apr_pool_t *pool, apr_file_t *f,
@@ -3473,7 +3473,7 @@ static int apn_output_unsupported_list(apr_pool_t *pool, apr_file_t *f)
             }
         }
         if(str){
-            printf(str);
+            printf("%s", str);
             apn_conf_file_printf(pool, f, str);
         }
 

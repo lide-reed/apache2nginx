@@ -547,6 +547,26 @@ static void register_hooks(apr_pool_t *p)
 }
 
 
+static char *
+rewrite_args(apr_pool_t *pool, alias_entry *entries)
+{
+    char *arg = NULL;
+    char *flags_in_ngx = NULL;
+    if (entries->redir_status == HTTP_MOVED_PERMANENTLY) {
+        flags_in_ngx = "permanent";
+        arg = apr_pstrcat(pool, "\"", entries->fake, "\"", " ", entries->real, " ", flags_in_ngx, NULL);
+    } else if (entries->redir_status == HTTP_MOVED_TEMPORARILY) {
+        flags_in_ngx = "redirect";
+        arg = apr_pstrcat(pool, "\"", entries->fake, "\"", " ", entries->real, " ", flags_in_ngx, NULL);
+    } else {
+        flags_in_ngx = "redirect";
+        arg = apr_pstrcat(pool, "\"", entries->fake, "\"", " ", entries->real, " ", flags_in_ngx, NULL);
+    }
+
+    return arg;
+}
+
+
 static apn_module_t* 
 convert_alias_in_dir( apr_pool_t *pool, cmd_parms *parms, ap_conf_vector_t* v ) 
 {
@@ -600,8 +620,10 @@ convert_alias_in_dir( apr_pool_t *pool, cmd_parms *parms, ap_conf_vector_t* v )
     if (conf != NULL) {
         alias_entry *ent = conf->redirects->elts;
         for (n = 0; n < conf->redirects->nelts; n++) {
-            char *arg = apr_pstrcat(pool, ent[n].fake, " ", ent[n].real, NULL);
+            char *arg = rewrite_args(pool, ent);
             mod = apn_mod_insert_sibling(mod, "rewrite", arg);
+
+            ent++;
         }
     }
 
@@ -622,8 +644,10 @@ convert_alias_in_server( apr_pool_t *pool, cmd_parms *parms, ap_conf_vector_t* v
     int n;
     alias_entry *entries = conf->redirects->elts;
     for (n = 0; n < conf->redirects->nelts; n++) {
-        char *arg = apr_pstrcat(pool, entries[n].fake, " ", entries[n].real, NULL);
+        char *arg = rewrite_args(pool, entries);
         mod = apn_mod_insert_sibling(mod, "rewrite", arg);
+
+        entries++;
     }
 
     return mod;

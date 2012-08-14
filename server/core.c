@@ -589,6 +589,9 @@ AP_CORE_DECLARE(void) ap_add_limit_conf(core_dir_config *conf, void *limit_confi
     void **new_space = (void **)apr_array_push(conf->sec_limit);
 
     *new_space = limit_config;
+
+    core_dir_config *entry_core = ap_get_module_config((ap_conf_vector_t *)limit_config, &core_module);
+    entry_core->limited = conf->limited;
 }
 
 /* We need to do a stable sort, qsort isn't stable.  So to make it stable
@@ -4691,7 +4694,7 @@ static void* process_sec_limit( apr_pool_t* p,
             entry_core = ap_get_module_config(entry_config, &core_module);
             if (!entry_core) break;
 
-            xmethods = apn_get_methods_list(p, ~(dconf->limited));
+            xmethods = apn_get_methods_list(p, ~(entry_core->limited));
             if( !xmethods) {
                 apn_warning("methods is null.\n");
                 break;
@@ -4703,7 +4706,7 @@ static void* process_sec_limit( apr_pool_t* p,
                 return mod;
             }
 
-            parms->limited = dconf->limited;
+            parms->limited = entry_core->limited;
             rv = apn_walk_dir_config(p, parms, new_node, entry_config);
             if( rv != APR_SUCCESS ){
                 apn_error("sec_limit parse failure.\n");
@@ -4724,6 +4727,11 @@ static void* process_sec_limit( apr_pool_t* p,
             while(node){
                 node->location = APN_SRV_LOC;
                 node = node->next;
+            }
+
+            if (parms->path != NULL && num_sec > 1) {
+                new_node->comment = "More than one \"limit_except\" are not allowed in the same \"location\". Ignore others.";
+                break;
             }
 
         }
@@ -4906,7 +4914,38 @@ static void* process_sec_dir( apr_pool_t* p,
             entry_core = ap_get_module_config(entry_config, &core_module);
             if (!entry_core) break;
             const char *dir = entry_core->d;
+
             if (dir){
+                core_dir_config *entry_core_tmp = entry_core;
+                const char *dir_tmp = NULL;
+                int sec_idx_tmp;
+
+                int exist_duplicate = 0;
+                int left_right = 0; // sec_idx_tmp in the right of sec_idx -- left_right=1
+                                    // sec_idx_tmp in the left  of sec_idx -- left_right=-1
+
+                for (sec_idx_tmp = 0; sec_idx_tmp < num_sec; ++sec_idx_tmp) {
+                    if (sec_idx_tmp == sec_idx) {
+                        continue;
+                    }
+                    
+                    entry_core_tmp =  ap_get_module_config(sec_ent[sec_idx_tmp], &core_module);
+                    dir_tmp = entry_core_tmp->d;
+
+                    if (dir_tmp != NULL && strcmp(dir_tmp, dir) == 0) {
+                        if (sec_idx_tmp > sec_idx) {
+                            left_right = 1;
+                        } else {
+                            left_right = -1;
+                        }
+                        break;
+                    }
+                }
+
+                if (left_right == 1) {
+                    continue;
+                }
+
                 apn_debug("[per_server] sec_dir %s\n", entry_core->d);
                 if (entry_core->r || entry_core->d_is_fnmatch) {
                     dir = apr_pstrcat(p, "~ \"", dir, "\"", NULL );
@@ -4919,6 +4958,10 @@ static void* process_sec_dir( apr_pool_t* p,
                 if (new_node == NULL) {
                     apn_error("Failed to new a node.\n");
                     return mod;
+                }
+
+                if (left_right == -1) {
+                    new_node->comment = "More than one location have the same arguments. Ignore others."; 
                 }
 
                 parms->path = entry_core->d;
