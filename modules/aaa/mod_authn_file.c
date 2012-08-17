@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/*
+ * Based on the code of Apache Httpd, Written by: 
+ *   Reed Lee <mailtolide@sina.com>
+ */
+
 #include "apr_strings.h"
 #include "apr_md5.h"            /* for apr_password_validate */
 

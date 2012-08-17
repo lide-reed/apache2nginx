@@ -1,3 +1,41 @@
+                     The Apache2Nginx Tool Project
+
+                             August 2012
+
+The Apache2Nginx Project is a collaborative software development effort aimed
+at creating a command line tool, which can be used to generate nginx conf file
+according to given config files of Apache Httpd.
+
+In addition, serveral users have contributed ideas, code, and documentation 
+to the project.  This file is intended to briefly describe the history of the 
+Apache2Nginx, recognize the many contributors, and explain how you can join 
+the fun too.
+
+In March of 2012, Reed Lee put forwards to an idea which can help people to
+migrate web server from Apache Httpd to Nginx.
+
+In April of 2012, Reed Lee developed a prototype, which is based on the source
+code of Apache Httpd, and then, James Lee and Youngseok choi also joined.
+
+In August 2012, the version 1.0.0 released.
+
+How to become involved in the Apache2Nginx Tool project
+=======================================================
+
+There are several levels of contributing.  If you just want to send
+in an occasional suggestion/fix, then you can just use the bug reporting
+form at <https://github.com/nhnc-nginx/apache2nginx/issues>.  
+You can also mail to apache2nginx@gmail.com.
+
+If you'd like to become an active contributor to the Apache2Nginx Tool
+project, You can also mail to apache2nginx@gmail.com.
+
+Thanks for using Apache2Nginx!
+
+
+Disclaimer of Liability
+========================
+
 THE AUTHOR(S) OF APACHE2NGINX SOFTWARE IS NOT LIABLE FOR ANY DAMAGES SUFFERED AS A RESULT OF USING, MODIFYING, CONTRIBUTING, OR COPYING THE SOFTWARE. THE AUTHOR(S) OF APACHE2NGINX SOFTWARE IS ALSO NOT LIABLE FOR ANY INDIRECT, INCIDENTAL, PUNITIVE, SPECIAL OR CONSEQUENTIAL DAMAGE (INCLUDING LOSS OF BUSINESS, REVENUE, PROFITS, USE, DATA OR OTHER ECONOMIC ADVANTAGE).
 
 THE FUNCTION PROVIDED BY THIS TOOL CAN'T BE GUARANTEED AND ASSURED TO BE ACCURATE. THE PURPOSE OF DESIGNING THIS SOFTWARE IS TO HELP USERS EASILY CONVERTING THE APACHE CONFIGURATION FILES TO NGINX'S. USER SHOULD CHECK WHETHER THE CONVERTED RESULT IS EFFECTIVE OR NOT BEFORE USING IN THE PRODUCTION ENVIRONMENT.

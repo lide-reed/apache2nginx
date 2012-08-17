@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/*
+ * Based on the code of Apache Httpd, Written by: 
+ *   Reed Lee <mailtolide@sina.com>
+ */
+
 /**
  * @file http_config.h
  * @brief Apache Configuration

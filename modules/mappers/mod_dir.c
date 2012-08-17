@@ -15,6 +15,11 @@
  */
 
 /*
+ * Based on the code of Apache Httpd, Written by: 
+ *   James Lee <jsandjh@gmail.com>
+ */
+
+/*
  * mod_dir.c: handle default index files, and trailing-/ redirects
  */
 

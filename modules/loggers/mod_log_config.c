@@ -15,6 +15,11 @@
  */
 
 /*
+ * Based on the code of Apache Httpd, Written by: 
+ *   James Lee <jsandjh@gmail.com>
+ */
+
+/*
  * Modified by djm@va.pubnix.com:
  * If no TransferLog is given explicitly, decline to log.
  *

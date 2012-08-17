@@ -25,6 +25,11 @@
  * (zlib functions gz_open and gzwrite, check_header)
  */
 
+/*
+ * Based on the code of Apache Httpd, Written by: 
+ *   Reed Lee <mailtolide@sina.com>
+ */
+
 /* zlib flags */
 #define ASCII_FLAG   0x01 /* bit 0 set: file probably ascii text */
 #define HEAD_CRC     0x02 /* bit 1 set: header CRC present */

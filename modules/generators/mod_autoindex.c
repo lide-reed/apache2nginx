@@ -25,6 +25,11 @@
  * Version sort added by Martin Pool <mbp@humbug.org.au>.
  */
 
+/*
+ * Based on the code of Apache Httpd, Written by: 
+ *   Reed Lee <mailtolide@sina.com>
+ */
+
 #include "apr_strings.h"
 #include "apr_fnmatch.h"
 #include "apr_strings.h"

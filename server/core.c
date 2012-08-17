@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/*
+ * Based on the code of Apache Httpd, Written by: 
+ *   Reed Lee <mailtolide@sina.com>
+ *   James Lee <jsandjh@gmail.com>
+ *   Choi Youngseok <zealot33@gmail.com>
+ */
+
 #include "apr.h"
 #include "apr_strings.h"
 #include "apr_lib.h"

@@ -1,0 +1,15 @@
+                                                         -*- coding: utf-8 -*-
+Changes with Apache2Nginx 1.0.1
+
+  *) BUGFIX: Transfer httpd.conf with Apache2Nginx, 
+     startup nginx with transferred nginx.conf, 
+	 error happened:[emerg]: duplicate location "/" in nginx.conf.
+
+  *) BUGFIX: "limit_except" directive duplicate in the same location.
+
+  *) BUGFIX: "RedirectMatch" was transferred as "Rewrite ...", 
+     but the regular expression is not in quotation marks.
+
+  *) BUGFIX: When there is unrecognized argument in LogFormat, 
+     the prompt of LogFormat is wrong.
+

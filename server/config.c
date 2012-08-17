@@ -29,6 +29,11 @@
  *
  */
 
+/*
+ * Based on the code of Apache Httpd, Written by: 
+ *   Reed Lee <mailtolide@sina.com>
+ */
+
 #include "apr.h"
 #include "apr_strings.h"
 #include "apr_portable.h"

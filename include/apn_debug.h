@@ -1,10 +1,32 @@
-/** 
- * @file apn_debug.h
- * @brief include some usefull global definition and functions.
- * @author lide, lide@nhn.com
- * @date 2012-04-24
+/* Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
+/*
+ * Platform Development Team 2
+ * 9th Floor, Tower B, Fairmont Tower,
+ * No.33 Guangshun North Avenue
+ * Wangjing, Chaoyang District
+ * Beijing, China, 100102
+ * www.nhncorp.cn | cn.naver.com
+ *
+ * Written by: Reed Lee <mailtolide@sina.com>
+ * Copyright (C) 2012, NHN China Corp. 
+ * All rights reserved.
+ *
+ */
 
 #ifndef APN_DEBUG_H
 #define APN_DEBUG_H

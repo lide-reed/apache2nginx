@@ -21,6 +21,11 @@
  *
  */
 
+/*
+ * Based on the code of Apache Httpd, Written by: 
+ *   James Lee <jsandjh@gmail.com>
+ */
+
 #include "apr_strings.h"
 #include "apr_network_io.h"
 #include "apr_md5.h"

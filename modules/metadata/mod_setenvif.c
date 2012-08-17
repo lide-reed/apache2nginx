@@ -24,6 +24,11 @@
  */
 
 /*
+ * Based on the code of Apache Httpd, Written by: 
+ *   Reed Lee <mailtolide@sina.com>
+ */
+
+/*
  * Used to set environment variables based on the incoming request headers,
  * or some selected other attributes of the request (e.g., the remote host
  * name).

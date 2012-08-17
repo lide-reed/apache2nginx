@@ -14,6 +14,21 @@
  * limitations under the License.
  */
 
+/*
+ * Platform Development Team 2
+ * 9th Floor, Tower B, Fairmont Tower,
+ * No.33 Guangshun North Avenue
+ * Wangjing, Chaoyang District
+ * Beijing, China, 100102
+ * www.nhncorp.cn | cn.naver.com
+ *
+ * Written by: Reed Lee <mailtolide@sina.com>
+ * Copyright (C) 2012, NHN China Corp. 
+ * All rights reserved.
+ *
+ */
+
+
 #include "apr.h"
 #include "apr_strings.h"
 #include "apr_file_io.h"

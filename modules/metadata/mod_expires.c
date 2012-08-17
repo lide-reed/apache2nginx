@@ -15,6 +15,11 @@
  */
 
 /*
+ * Based on the code of Apache Httpd, Written by: 
+ *   Reed Lee <mailtolide@sina.com>
+ */
+
+/*
  * mod_expires.c
  * version 0.0.11
  * status beta

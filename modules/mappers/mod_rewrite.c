@@ -46,6 +46,11 @@
  *      www.engelschall.com
  */
 
+/*
+ * Based on the code of Apache Httpd, Written by: 
+ *   James Lee <jsandjh@gmail.com>
+ */
+
 #include "apr.h"
 #include "apr_strings.h"
 #include "apr_hash.h"
