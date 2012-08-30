@@ -2576,6 +2576,12 @@ static apn_module_t* process_server_config( apr_pool_t *p, server_rec *s)
             if (addrs->host_addr->family == AF_INET) {
                 if (virthost && strcmp(virthost, "*") == 0 && host_port != 0) {
                     addr_list = apr_pstrcat( p, port, NULL);
+                } else if (virthost && strncmp(virthost, "_default_", sizeof("_default_")) == 0) {
+                    if (host_port != 0) {
+                        addr_list = apr_pstrcat( p, "*:", port, " default_server", NULL);
+                    } else {
+                        addr_list = apr_pstrcat( p, "* default_server", NULL);
+                    }
                 } else if (virthost && host_port != 0) {
                     addr_list = apr_pstrcat( p, virthost, ":", port, NULL);
                 }
