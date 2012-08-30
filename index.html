@@ -1,0 +1,140 @@
+<!doctype html>
+<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
+<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on http://github.com/jonrohan -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen"/>
+  <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="javascripts/script.js"></script>
+
+  <title>Apache2nginx</title>
+  <meta name="description" content="A command line tool, which can be used to generate nginx config file according to given config files of Apache">
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <header>
+      <h1 class="title">Apache2nginx</h1>
+    </header>
+    <div id="container">
+      <p class="tagline">A command line tool, which can be used to generate nginx config file according to given config files of Apache</p>
+      <div id="main" role="main">
+        <div class="download-bar">
+        <div class="inner">
+          <a href="https://github.com/nhnc-nginx/apache2nginx/tarball/master" class="download-button tar"><span>Download</span></a>
+          <a href="https://github.com/nhnc-nginx/apache2nginx/zipball/master" class="download-button zip"><span>Download</span></a>
+          <a href="https://github.com/nhnc-nginx/apache2nginx" class="code">View Apache2nginx on GitHub</a>
+        </div>
+        <span class="blc"></span><span class="trc"></span>
+        </div>
+        <article class="markdown-body">
+          <h1>Apache2Nginx</h1>
+
+<p>A command line tool, which can be used to generate nginx config file according to given config files of Apache.</p>
+
+<h2>Overview</h2>
+
+<p>NGINX (“engine x”) is a high performance web server, caching proxy and a Layer 7 load balancing solution. Millions of web sites on the Internet benefit from using NGINX because of its extreme performance, scalability, reliability, flexibility and security. </p>
+
+<p>However, like Apache, the configuration of NGINX is not an easy thing for most of the people. In particularly, it will take our more efforts to learn the modules and directives in Apache and Nginx when we need to migrate to NGINX from Apache server.</p>
+
+<p>According to the above requirement, we developed the apache2nginx tool. The goal of this tool is generating Nginx configuration file(s) according to those of Apache. </p>
+
+<h2>Download and Installation</h2>
+
+<p>You could download source code or binary file (i386 or x86_64) to use.</p>
+
+<h3>Download Binary</h3>
+
+<div class="highlight"><pre><span class="nv">$ </span>wget https://github.com/downloads/nhnc-nginx/apache2nginx/apache2nginx-1.0.1-bin.i386.tar.bz2
+<span class="nv">$ </span>tar jxvf apache2nginx-1.0.1-bin.i386.tar.bz2
+</pre></div>
+
+<p>Now you will get the executable file apache2nginx.</p>
+
+<p>you can by follow command to try use.</p>
+
+<div class="highlight"><pre><span class="nv">$ </span>./apache2nginx -h
+</pre></div>
+
+<h3>Download Source Code</h3>
+
+<p>Step 1: Download and unzip source code to the above directory.</p>
+
+<div class="highlight"><pre><span class="nv">$ </span>wget https://github.com/nhnc-nginx/apache2nginx/zipball/master
+<span class="nv">$ </span>unzip nhnc-nginx-apache2nginx.zip
+</pre></div>
+
+<p>Step 2: Configure: you could change the PREFIX by --prefix option for the installation directory</p>
+
+<div class="highlight"><pre><span class="nv">$ </span><span class="nb">cd </span>nhnc-nginx-apache2nginx
+<span class="nv">$ </span>./configure --prefix<span class="o">=</span>/usr/local/apache2nginx
+</pre></div>
+
+<p>Step 3: Compile and install</p>
+
+<div class="highlight"><pre><span class="nv">$ </span>make <span class="o">&amp;&amp;</span> make install
+</pre></div>
+
+<p>Step 4: Add apache2nginx to PATH environment variable.</p>
+
+<div class="highlight"><pre><span class="nv">$ </span><span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>/usr/local/apache2nginx/bin:<span class="nv">$PATH</span>
+</pre></div>
+
+<h2>Run</h2>
+
+<p>The easiest way to run Apache2nginx is as below:</p>
+
+<div class="highlight"><pre><span class="nv">$ </span>apache2nginx -f /etc/httpd/conf/httpd.conf
+</pre></div>
+
+<p>Now, if it’s ok, nginx.conf will been produced.
+By default, the converting result file is nginx.conf which is in the current directory.</p>
+
+<h2>Docs &amp; Help</h2>
+
+<ol>
+<li>Manual <a href="https://github.com/downloads/nhnc-nginx/apache2nginx/apache2nginx_manual.pdf">apache2nginx_manual.pdf</a>
+</li>
+<li>Supported Modules <a href="https://github.com/downloads/nhnc-nginx/apache2nginx/apache_module_support.pdf">apache_module_support.pdf</a>
+</li>
+<li>Module and Directive Mapping <a href="http://cloud.github.com/downloads/nhnc-nginx/apache2nginx/module_directive_mapping.pdf">module_directive_mapping.pdf</a>
+</li>
+</ol><h2>Disclaimer of Liability</h2>
+
+<p>THE AUTHOR(S) OF APACHE2NGINX SOFTWARE IS NOT LIABLE FOR ANY DAMAGES SUFFERED AS A RESULT OF USING, MODIFYING, CONTRIBUTING, OR COPYING THE SOFTWARE. THE AUTHOR(S) OF APACHE2NGINX SOFTWARE IS ALSO NOT LIABLE FOR ANY INDIRECT, INCIDENTAL, PUNITIVE, SPECIAL OR CONSEQUENTIAL DAMAGE (INCLUDING LOSS OF BUSINESS, REVENUE, PROFITS, USE, DATA OR OTHER ECONOMIC ADVANTAGE).</p>
+
+<p>THE FUNCTION PROVIDED BY THIS TOOL CAN'T BE GUARANTEED AND ASSURED TO BE ACCURATE. THE PURPOSE OF DESIGNING THIS SOFTWARE IS TO HELP USERS EASILY CONVERTING THE APACHE CONFIGURATION FILES TO NGINX'S. USER SHOULD CHECK WHETHER THE CONVERTED RESULT IS EFFECTIVE OR NOT BEFORE USING IN THE PRODUCTION ENVIRONMENT.</p>
+
+<p>THE APACHE2NGINX SOFTWARE CONVERTS THE APACHE CONFIGURATION FILES ACCORDING TO THE FUNCTION OF APACHE MODULES NOT THE DIRECTIVES. SO THERE AREN’T THE 1 TO 1 RELATIONS BETWEEN THE APACHE DIRECTIVES TO NGINX DIRECTIVES.</p>
+        </article>
+      </div>
+    </div>
+    <footer>
+      <div class="owner">
+      <p><a href="https://github.com/nhnc-nginx" class="avatar"><img src="https://secure.gravatar.com/avatar/6ba7d0c7cbbf8315d748283ba96f8122?s=30&amp;d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-user-420.png" width="48" height="48"/></a> <a href="https://github.com/nhnc-nginx">nhnc-nginx</a> maintains <a href="https://github.com/nhnc-nginx/apache2nginx">Apache2nginx</a></p>
+
+
+      </div>
+      <div class="creds">
+        <small>This page generated using <a href="https://pages.github.com/">GitHub Pages</a><br/>theme by <a href="http://twitter.com/jonrohan/">Jon Rohan</a></small>
+      </div>
+    </footer>
+  </div>
+  <div class="current-section">
+    <a href="#top">Scroll to top</a>
+    <a href="https://github.com/nhnc-nginx/apache2nginx/tarball/master" class="tar">tar</a><a href="https://github.com/nhnc-nginx/apache2nginx/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
+    <p class="name"></p>
+  </div>
+
+  
+</body>
+</html>
