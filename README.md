@@ -12,9 +12,9 @@ According to the above requirement, we developed the apache2nginx tool. The goal
 
 ## Download and Installation 
 
-You could download source code or binary file (i386 or x86_64) to use.
+You can download a Linux executable (for both i386/x86_64) or compile from source. If you're on a Mac, compiling from source has been tested with OS X Yosemite.
 
-### Download Binary 
+### Download Linux Binary
 
 ```bash
 $ wget https://github.com/downloads/nhnc-nginx/apache2nginx/apache2nginx-1.0.1-bin.i386.tar.bz2
@@ -33,7 +33,7 @@ $ ./apache2nginx -h
 Step 1: Download and unzip source code to the above directory.
 
 ```bash
-$ wget https://github.com/nhnc-nginx/apache2nginx/zipball/master
+$ wget https://github.com/nhnc-nginx/apache2nginx/zipball/master -O nhnc-nginx-apache2nginx.zip
 $ unzip nhnc-nginx-apache2nginx.zip
 ```
 
