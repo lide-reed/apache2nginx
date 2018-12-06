@@ -33,11 +33,11 @@ extern "C" {
  * @{
  */
 /**
- * Function to implemnt the APR_OPTIONAL_HOOK Macro
+ * Function to implement the APR_OPTIONAL_HOOK Macro
  * @internal
  * @see APR_OPTIONAL_HOOK
  *
- * @param name The name of the hook
+ * @param szName The name of the hook
  * @param pfn A pointer to a function that will be called
  * @param aszPre a NULL-terminated array of strings that name modules whose hooks should precede this one
  * @param aszSucc a NULL-terminated array of strings that name modules whose hooks should succeed this one
@@ -46,9 +46,9 @@ extern "C" {
 
 
 APU_DECLARE(void) apr_optional_hook_add(const char *szName,void (*pfn)(void),
-                    const char * const *aszPre,
-                    const char * const *aszSucc,
-                    int nOrder);
+					const char * const *aszPre,
+					const char * const *aszSucc,
+					int nOrder);
 
 /**
  * Hook to an optional hook.
@@ -96,16 +96,16 @@ link##_DECLARE(ret) ns##_run_##name args_decl \
     apr_array_header_t *pHookArray=apr_optional_hook_get(#name); \
 \
     if(!pHookArray) \
-    return ok; \
+	return ok; \
 \
     pHook=(ns##_LINK_##name##_t *)pHookArray->elts; \
     for(n=0 ; n < pHookArray->nelts ; ++n) \
-    { \
-    rv=(pHook[n].pFunc)args_use; \
+	{ \
+	rv=(pHook[n].pFunc)args_use; \
 \
-    if(rv != ok && rv != decline) \
-        return rv; \
-    } \
+	if(rv != ok && rv != decline) \
+	    return rv; \
+	} \
     return ok; \
     }
 

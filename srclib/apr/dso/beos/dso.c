@@ -40,8 +40,8 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
     if((newid = load_add_on(path)) < B_NO_ERROR) {
         (*res_handle)->errormsg = strerror(newid);
         return APR_EDSOOPEN;
-    }
-    
+	}
+	
     (*res_handle)->pool = pool;
     (*res_handle)->handle = newid;
 
@@ -64,7 +64,7 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_hand
         return APR_ESYMNOTFOUND;
 
     err = get_image_symbol(handle->handle, symname, B_SYMBOL_TYPE_ANY, 
-             ressym);
+			 ressym);
 
     if(err != B_OK)
         return APR_ESYMNOTFOUND;

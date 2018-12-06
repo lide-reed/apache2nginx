@@ -36,14 +36,14 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf,
                 | ((apr_os_level >= APR_WIN_2000) ? 0x40 : 0);
 
     if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, flags)) {
-    return apr_get_os_error();
+	return apr_get_os_error();
     }
     /* XXX: An ugly hack for Win64, randomness is such that noone should
      * ever expect > 2^31 bytes of data at once without the prng
      * coming to a complete halt.
      */
     if (!CryptGenRandom(hProv, (DWORD)length, buf)) {
-        res = apr_get_os_error();
+    	res = apr_get_os_error();
     }
     CryptReleaseContext(hProv, 0);
     return res;

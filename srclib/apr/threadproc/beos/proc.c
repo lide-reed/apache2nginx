@@ -23,9 +23,9 @@
 static apr_file_t no_file = { NULL, -1, };
 
 struct send_pipe {
-    int in;
-    int out;
-    int err;
+	int in;
+	int out;
+	int err;
 };
 
 APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new, apr_pool_t *pool)
@@ -138,11 +138,11 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
         return errno;
     }
     else if (pid == 0) {
-        /* This is really ugly...
-         * The semantics of BeOS's fork() are that areas (used for shared
-         * memory) get COW'd :-( The only way we can make shared memory
-         * work across fork() is therefore to find any areas that have
-         * been created and then clone them into our address space.
+		/* This is really ugly...
+		 * The semantics of BeOS's fork() are that areas (used for shared
+		 * memory) get COW'd :-( The only way we can make shared memory
+		 * work across fork() is therefore to find any areas that have
+		 * been created and then clone them into our address space.
          * Thankfully only COW'd areas have the lock variable set at
          * anything but 0, so we can use that to find the areas we need to
          * copy. Of course what makes it even worse is that the loop through
@@ -150,13 +150,13 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
          * eventually segfault unless we know when we reach then end of the
          * "original" areas and stop. Why? Well, we delete the area and then
          * add another to the end of the list...
-         */
-        area_info ai;
-        int32 cookie = 0;
+		 */
+		area_info ai;
+		int32 cookie = 0;
         area_id highest = 0;
-        
+		
         while (get_next_area_info(0, &cookie, &ai) == B_OK)
-            if (ai.area    > highest)
+            if (ai.area	> highest)
                 highest = ai.area;
         cookie = 0;
         while (get_next_area_info(0, &cookie, &ai) == B_OK) {
@@ -169,7 +169,7 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
                            ai.protection, original);
             }
         }
-        
+		
         proc->pid = pid;
         proc->in = NULL; 
         proc->out = NULL; 
@@ -215,7 +215,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname,
     thread_id newproc, sender;
     struct send_pipe *sp;        
     char * dir = NULL;
-        
+	    
     sp = (struct send_pipe *)apr_palloc(pool, sizeof(struct send_pipe));
 
     new->in = attr->parent_in;
@@ -230,8 +230,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname,
         i++;
     }
 
-    newargs = (char**)malloc(sizeof(char *) * (i + 4));
-    newargs[0] = strdup("/boot/home/config/bin/apr_proc_stub");
+	newargs = (char**)malloc(sizeof(char *) * (i + 4));
+	newargs[0] = strdup("/boot/home/config/bin/apr_proc_stub");
     if (attr->currdir == NULL) {
         /* we require the directory , so use a temp. variable */
         dir = malloc(sizeof(char) * PATH_MAX);
@@ -362,8 +362,9 @@ APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr, apr_fi
                     == APR_SUCCESS)
                 rv = apr_file_inherit_set(attr->child_in);
         }
+    }
 
-    if (parent_in != NULL && rv == APR_SUCCESS) {
+    if (parent_in != NULL && rv == APR_SUCCESS)
         rv = apr_file_dup(&attr->parent_in, parent_in, attr->pool);
 
     return rv;
@@ -391,7 +392,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr, apr_f
         }
     }
   
-    if (parent_out != NULL && rv == APR_SUCCESS) {
+    if (parent_out != NULL && rv == APR_SUCCESS)
         rv = apr_file_dup(&attr->parent_out, parent_out, attr->pool);
 
     return rv;
@@ -419,7 +420,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr, apr_f
         }
     }
   
-    if (parent_err != NULL && rv == APR_SUCCESS) {
+    if (parent_err != NULL && rv == APR_SUCCESS)
         rv = apr_file_dup(&attr->parent_err, parent_err, attr->pool);
 
     return rv;
@@ -440,6 +441,14 @@ APR_DECLARE(apr_status_t) apr_procattr_user_set(apr_procattr_t *attr,
 
 APR_DECLARE(apr_status_t) apr_procattr_group_set(apr_procattr_t *attr,
                                                  const char *groupname)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_procattr_perms_set_register(apr_procattr_t *attr,
+                                                 apr_perms_setfn_t *perms_set_fn,
+                                                 void *data,
+                                                 apr_fileperms_t perms)
 {
     return APR_ENOTIMPL;
 }

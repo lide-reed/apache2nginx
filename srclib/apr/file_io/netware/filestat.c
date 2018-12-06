@@ -199,7 +199,7 @@ static apr_status_t stat_cache_cleanup(void *data)
     apr_pool_t *p = (apr_pool_t *)getGlobalPool();
     apr_hash_index_t *hi;
     apr_hash_t *statCache = (apr_hash_t*)data;
-    char *key;
+	char *key;
     apr_ssize_t keylen;
     NXPathCtx_t pathctx;
 
@@ -320,7 +320,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo,
 
     getcwdpath(NULL, &pathCtx, CTX_ACTUAL_CWD);
 #ifdef APR_HAS_PSA
-    srv = getstat(pathCtx, (char*)fname, &info, ST_STAT_BITS|ST_NAME_BIT);
+	srv = getstat(pathCtx, (char*)fname, &info, ST_STAT_BITS|ST_NAME_BIT);
 #else
     srv = cstat(pathCtx, (char*)fname, &info, ST_STAT_BITS|ST_NAME_BIT, pool);
 #endif

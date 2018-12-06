@@ -26,13 +26,13 @@
 #include "apr_errno.h"
 
 /* ### this might be better off as sizeof(char *) */
-#define BYTESIZ        8
+#define BYTESIZ		8
 
 /*
  * misc
  */
 #ifdef DEBUG
-#define debug(x)    printf x
+#define debug(x)	printf x
 #else
 #define debug(x)
 #endif

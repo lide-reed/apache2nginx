@@ -64,6 +64,7 @@ abts_suite *testatomic(abts_suite *suite);
 abts_suite *testdir(abts_suite *suite);
 abts_suite *testdso(abts_suite *suite);
 abts_suite *testdup(abts_suite *suite);
+abts_suite *testescape(abts_suite *suite);
 abts_suite *testenv(abts_suite *suite);
 abts_suite *testfile(abts_suite *suite);
 abts_suite *testfilecopy(abts_suite *suite);
@@ -102,5 +103,6 @@ abts_suite *testtime(abts_suite *suite);
 abts_suite *testud(abts_suite *suite);
 abts_suite *testuser(abts_suite *suite);
 abts_suite *testvsn(abts_suite *suite);
+abts_suite *testskiplist(abts_suite *suite);
 
 #endif /* APR_TEST_INCLUDES */

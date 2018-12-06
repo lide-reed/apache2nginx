@@ -1,127 +1,140 @@
                                                      -*- coding: utf-8 -*-
-Changes for APR 1.4.5
+Changes for APR 1.6.5
 
-  *) Security: CVE-2011-1928
-     apr_fnmatch(): Fix high CPU loop.  [William Rowe]
+  *) Fix Win32 build breakage in apr_os_exp_time_put() in 1.6.4. [Rainer Jung]
+     
+Changes for APR 1.6.4 (not released)
 
-  *) Fix top_builddir in installed apr_rules.mk.  [Bojan Smojver]
+  *) configure: Fix detection of <net/if.h> on OpenBSD.
+     PR 61976. [David Carlier <devnexen gmail.com>, Yann Ylavic]
 
-Changes for APR 1.4.4
+  *) Fix apr_parse_addr_port() regression in scope_id parsing introduced
+     in 1.6.3.  [Rainer Jung]
 
-  *) Windows: Fix command-line builds.  [William Rowe]
+  *) Fix Win32 file buffer locking behavior for single threaded file streams.
+     [Evgeny Kotkov, Mladen Turk, Jean-Frederic Clere]
 
-Changes for APR 1.4.3
+  *) Numerous corrections to APR poll behavior. [Yann Ylavic]
 
-  *) Security: CVE-2011-0419
-     Reimplement apr_fnmatch() from scratch using a non-recursive
-     algorithm; now has improved compliance with the fnmatch() spec.
-     [William Rowe]
+Changes for APR 1.6.3
 
-  *) Fix environment-related crash using some non-standard builds on
-     Windows 7/Server 2008.  [Steve Hay <SteveHay planit.com>]
+  *) apr_file_trunc: Truncating a buffered file could add unexpected
+     data after the truncate position. PR 51017.
+     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
 
-  *) poll, pollset, pollcb on Windows: Handle calls with no file/socket
-     descriptors.  PR 49882.  [Stefan Ruppert <sr myarm.com>, Jeff Trawick]
+  *) apr_file_trunc: Fix an issue where reading from a buffered file
+     after truncate could return stale data from the buffer.
+     [Evgeny Kotkov <evgeny.kotkov visualsvn.com>]
 
-  *) Fix APR_IPV6_V6ONLY issues on Windows related to run-time behavior 
-     on Windows older than Vista and SDK/MinGW levels without IPV6_V6ONLY.
-     PR 45321.  [Sob <sob hisoftware.cz>]
+  *) apr_ipsubnet_create() now fails for an empty input string.
+     [Joe Orton]
 
-  *) Fix address handling when accepting an AF_INET socket from a socket
-     bound as AF_INET6.   PR 49678.  [Joe Orton]
+Changes for APR 1.6.2
 
-  *) Fix error return values from apr_sockaddr_info_get() on Windows for
-     IPv6 builds.  [Ivan Zhakov <ivan visualsvn.com>]
+  *) Corrected non-Unix builds for APR_LOCK_DEFAULT.
 
-  *) Add new experimental configure option --enable-allocator-uses-mmap to
-     use mmap instead of malloc in apr_allocator_alloc(). This greatly reduces
-     memory fragmentation with malloc implementations (e.g. glibc) that
-     don't handle allocationss of a page-size-multiples in an efficient way.
-     It also makes apr_allocator_max_free_set() actually have some effect
-     on such platforms. [Stefan Fritsch]
+Changes for APR 1.6.1
 
-  *) configure: Support 64 and 32 bit universal builds for Darwin/
-     OS X 10.6+. [Jim Jagielski]
+  *) Defer timed locks API for later 1.7 release [Nick Kew, William Rowe]
 
-  *) apr_sockaddr_info_get() on AIX: Fix a problem which could set
-     the port field in the native socket address to 1 when 0 was
-     specified.  PR 46964.  [Jeff Trawick]
+  *) Export build files find_apr.m4 and apr_common.m4 [Jacob Champion]
 
-  *) configure: Make definition of apr_ino_t independent of
-     _FILE_OFFSET_BITS even on platforms where ino_t is 'unsigned int'.
+Changes for APR 1.6.0
+
+  *) apr_allocator: Provide apr_allocator_align() to get the true size that
+     would be allocated for the given size (including the header and
+     alignment).  [Yann Ylavic]
+
+  *) apr_os_proc_mutex_put_ex: Allow to specify whether the OS native
+     mutex should or not be cleaned up (destroyed) with the constructed
+     APR mutex (given pool), and default to not for the simple _put()
+     function.  [Yann Ylavic]
+
+  *) apr_proc/global_mutex: Fix API regarding the native OS mutexes
+     accessors from/to available APR mechanisms, adding the new functions
+     apr_os_proc_mutex_get_ex() and apr_os_proc_mutex_set_ex() which give
+     control to the user over the selected mechanisms, including the missing
+     POSIX semaphores (sem_t) on platforms supporting them.
+     [Yann Ylavic]
+
+  *) apr_proc_mutex-pthread: Refcount shared mutexes usage to avoid
+     destruction while still is use by some process(es).  PR 49504.
+     [Yann Ylavic]
+
+  *) apr_file_io: Add apr_file_pipe_create_pools() allowing a pair of
+     pipes to be created, each in a different pool. [Graham Leggett]
+
+  *) Add apr_pollcb_wakeup(), with similar behavior to
+     apr_pollset_wakeup(). Add apr_pollcb_method_name(), with similar 
+     behavior to apr_pollset_method_name().
+     [Neil Conway <nrc cs berkeley edu>, Jeff Trawick]
+
+  *) apr_table_overlap: Add APR_OVERLAP_TABLES_ADD to merge and set when
+     overlapping tables. [Graham Leggett]
+
+  *) locks: Introduce apr_{thread,proc,global}_mutex_timedlock().
+     [Yann Ylavic]
+
+  *) Introduce the apr_cstr_fn() family of functions, derived from
+     the svn_cstring_ functions of the Subversion project.
+
+  *) Add APR_SO_FREEBIND option for apr_socket_opt_set.  PR 58725.
+     [Ashley GC, Jan Kaluza, Joe Orton]
+
+  *) apr_filepath_merge: Fix truename length calculation on Windows
+     in cases where the "short" name variant is actually longer than
+     the "long" or "true" name. See: testnames.c:merge_shortname().
+     [Bert Huijben <rhuijben a.o>]
+
+  *) apr_atomic: Fix errors when building on Visual Studio 2013 while
+     maintaining the ability to build on Visual Studio 6 with Windows
+     Server 2003 R2 SDK. PR 57191. [Gregg Smith]
+
+  *) apr_skiplist: Add apr_skiplist_addne*() family to preserve existing
+     values (no duplicate), add apr_skiplist_size(), apr_skiplist_height()
+     and apr_skiplist_preheight() to get the corresponding current values,
+     and apr_skiplist_set_preheight() to modify it. [ Yann Ylavic ]
+
+  *) Add new --enable-allocator-guard-pages which is like allocator-uses-mmap,
+     but will also add inaccessible guard pages before and after each memnode.
+     This will result in higher ressource usage but allow to find/protect
+     against certain buffer overflow/overread bugs. Under Linux, it may be
+     necessary to increase /proc/sys/vm/max_map_count . [Stefan Fritsch]
+
+  *) apr_skiplist: Add apr_skiplist_add() to support multiple values.
+
+  *) Add new --enable-pool-concurrency-check configure option to detect
+     thread-unsafe concurrent accesses to pools. Runtime costs should be
+     relatively low. [Stefan Fritsch]
+
+  *) Add support code to teach valgrind about APR pools and allocators.
      [Stefan Fritsch]
 
-  *) apr_ring: Workaround for aliasing problem that causes gcc 4.5 to
-     miscompile some brigade related code. PR 50190. [Stefan Fritsch]
+  *) Add apr_sockaddr_info_copy(), for making a deep copy of an
+     apr_sockaddr_t into a specified pool.  [Yann Ylavic
+     <ylavic.dev gmail.com>]
 
-  *) apr_file_flush_locked(): Handle short writes. [Stefan Fritsch]
-
-  *) apr_pollset_create_ex(): Trap errors from pollset providers.
-     PR 49094.  [Sami Tolvanen <sami.tolvanen mywot.com>]
-
-  *) apr_pollset_create*(): Fix memory lifetime problem with the wakeup
-     pipe when the pollset was created with APR_POLLSET_NOCOPY.
-     [Neil Conway <nrc cs.berkeley.edu>]
-
-  *) Fix detection of some Linux variants when configure is built with
-     recent GNU tools.  [Eric Covener]
-
-  *) Avoid a redundant fcntl() call in apr_file_open() where O_CLOEXEC
-     is supported.  PR 46297.  [Joe Orton]
-
-  *) Improve platform detection by updating config.guess and config.sub.
-     [Rainer Jung]
-
-Changes for APR 1.4.2
-
-  *) Undo a crash-bug introduced in 1.4.1 affecting some applications of 
-     the apr hash and table structures, reported to affect Subversion
-     by Bert Huijben <bert qqmail.nl>.  [Graham Leggett]
-
-Changes for APR 1.4.1
-
-  *) Win32: Properly handle the ERROR_DIRECTORY system error code.
-     [Brane Čibej]
-
-Changes for APR 1.4.0
-
-  *) Windows: Default build configurations assume NT or higher at run-time. 
-
-  *) Add apr_global_mutex_lockfile() for retrieving the file, if any,
-     associated with the mutex.  Add apr_global_mutex_name() for retrieving
-     the name of the lock mechanism used by the underlying proc mutex.
-     [Jeff Trawick]
-
-  *) Add apr_socket_atreadeof to determine whether the receive part of the
-     socket has been closed by the peer.
-     [Ruediger Pluem, Mladen Turk, Joe Orton]
-
-  *) Make apr_pollset and apr_pollcb implementations using providers.
-     Added apr_pollset_create_ex and apr_pollcb_create_ex that allows
-     choosing non-default providers.
+  *) Added Unix domain socket support.
      [Mladen Turk]
 
-  *) Win32: Use WSAPoll as default pollset method if supported and found
-     inside winsock dll.  [Mladen Turk]
+  *) Add apr_shm_delete() to compliment apr_shm_remove().
+     [Jim Jagielski]
 
-  *) apr_temp_dir_get() now checks the TMPDIR environment variable first,
-     instead of third.  [Jim Jagielski]
+  *) Intruduce APR_PERMS_SET macros for setting the owner/group on
+     objects. Currently only implemented for shm, proc and global
+     mutexes on posix platforms.
+     [Mladen Turk]
 
-  *) Add apr_file_sync() and apr_file_datasync() calls.  [Bojan Smojver]
+  *) Add apr_escape_ldap() and apr_pescape_ldap(), escaping characters
+     as described by RFC4514 and RFC4515 respectively. [Graham Leggett]
 
-  *) apr_pollset_wakeup() on Windows: Fix core caused by closing the
-     file_socket_pipe with standard file_close. 
-     [Arsen Chaloyan, Mladen Turk]
+Changes for APR 1.5.x and later:
 
-  *) Introduce apr_hash_do() for iterating over a hash table.  [Mladen Turk]
+  *) http://svn.apache.org/viewvc/apr/apr/branches/1.5.x/CHANGES?view=markup
 
-  *) Make sure WIN32 behaves the same as posix for file-backed shared memory 
-     by removing the file on cleanup/remove.  [Mladen Turk]
+Changes for APR 1.4.x and later:
 
-  *) Introduce apr_pollset_wakeup() for interrupting the blocking
-     apr_pollset_poll() call.  [Mladen Turk]
-
-  *) Add apr_file_link() function.  PR 44841.  [Mark Heily <mark heily.com>]
+  *) http://svn.apache.org/viewvc/apr/apr/branches/1.4.x/CHANGES?view=markup
 
 Changes for APR 1.3.x and later:
 

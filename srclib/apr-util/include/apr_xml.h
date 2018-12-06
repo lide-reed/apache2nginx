@@ -130,12 +130,12 @@ APU_DECLARE(void) apr_text_append(apr_pool_t *p, apr_text_header *hdr,
 **     left within the XML tree), so the APR_XML_NS_NONE value won't ever
 **     really apply to these values.
 */
-#define APR_XML_NS_DAV_ID    0    /**< namespace ID for "DAV:" */
-#define APR_XML_NS_NONE        -10    /**< no namespace for this elem/attr */
+#define APR_XML_NS_DAV_ID	0	/**< namespace ID for "DAV:" */
+#define APR_XML_NS_NONE		-10	/**< no namespace for this elem/attr */
 
-#define APR_XML_NS_ERROR_BASE    -100    /**< used only during processing */
+#define APR_XML_NS_ERROR_BASE	-100	/**< used only during processing */
 /** Is this namespace an error? */
-#define APR_XML_NS_IS_ERROR(e)    ((e) <= APR_XML_NS_ERROR_BASE)
+#define APR_XML_NS_IS_ERROR(e)	((e) <= APR_XML_NS_ERROR_BASE)
 
 /** @see apr_xml_attr */
 typedef struct apr_xml_attr apr_xml_attr;
@@ -173,13 +173,13 @@ struct apr_xml_elem {
     apr_text_header following_cdata;
 
     /** parent element */
-    struct apr_xml_elem *parent;    
+    struct apr_xml_elem *parent;	
     /** next (sibling) element */
-    struct apr_xml_elem *next;    
+    struct apr_xml_elem *next;	
     /** first child element */
     struct apr_xml_elem *first_child;
     /** first attribute */
-    struct apr_xml_attr *attr;        
+    struct apr_xml_attr *attr;		
 
     /* used only during parsing */
     /** last child element */
@@ -199,7 +199,7 @@ struct apr_xml_elem {
 /** apr_xml_doc: holds a parsed XML document */
 struct apr_xml_doc {
     /** root element */
-    apr_xml_elem *root;    
+    apr_xml_elem *root;	
     /** array of namespaces used */
     apr_array_header_t *namespaces;
 };
@@ -276,6 +276,7 @@ APU_DECLARE(char *) apr_xml_parser_geterror(apr_xml_parser *parser,
  *     APR_XML_X2T_INNER               contents only 
  *     APR_XML_X2T_LANG_INNER          xml:lang + inner contents 
  *     APR_XML_X2T_FULL_NS_LANG        FULL + ns defns + xml:lang 
+ *     APR_XML_X2T_PARSED              original prefixes
  * </PRE>
  * @param namespaces The namespace of the current XML element
  * @param ns_map Namespace mapping
@@ -288,10 +289,11 @@ APU_DECLARE(void) apr_xml_to_text(apr_pool_t *p, const apr_xml_elem *elem,
                                   apr_size_t *psize);
 
 /* style argument values: */
-#define APR_XML_X2T_FULL         0    /**< start tag, contents, end tag */
-#define APR_XML_X2T_INNER        1    /**< contents only */
-#define APR_XML_X2T_LANG_INNER   2    /**< xml:lang + inner contents */
-#define APR_XML_X2T_FULL_NS_LANG 3    /**< FULL + ns defns + xml:lang */
+#define APR_XML_X2T_FULL         0	/**< start tag, contents, end tag */
+#define APR_XML_X2T_INNER        1	/**< contents only */
+#define APR_XML_X2T_LANG_INNER   2	/**< xml:lang + inner contents */
+#define APR_XML_X2T_FULL_NS_LANG 3	/**< FULL + ns defns + xml:lang */
+#define APR_XML_X2T_PARSED       4	/**< original prefixes */
 
 /**
  * empty XML element

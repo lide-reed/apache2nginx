@@ -50,8 +50,8 @@ static void copy_helper(abts_case *tc, const char *from, const char * to,
     }
     else {
         ABTS_ASSERT(tc, "File size differs", 
-                        ((dest_rv == APR_SUCCESS) 
-                          ? dest.size : 0) + orig.size == copy.size);
+			            ((dest_rv == APR_SUCCESS) 
+			              ? dest.size : 0) + orig.size == copy.size);
     }
 }
 

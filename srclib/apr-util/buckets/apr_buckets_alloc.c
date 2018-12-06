@@ -18,6 +18,7 @@
 
 #include "apr_buckets.h"
 #include "apr_allocator.h"
+#include "apr_version.h"
 
 #define ALLOC_AMT (8192 - APR_MEMNODE_T_SIZE)
 
@@ -65,12 +66,20 @@ APU_DECLARE_NONSTD(apr_bucket_alloc_t *) apr_bucket_alloc_create(apr_pool_t *p)
     /* may be NULL for debug mode. */
     if (allocator == NULL) {
         if (apr_allocator_create(&allocator) != APR_SUCCESS) {
+            apr_abortfunc_t fn = apr_pool_abort_get(p);
+            if (fn)
+                (fn)(APR_ENOMEM);
             abort();
         }
     }
 #endif
-
     list = apr_bucket_alloc_create_ex(allocator);
+    if (list == NULL) {
+            apr_abortfunc_t fn = apr_pool_abort_get(p);
+            if (fn)
+                (fn)(APR_ENOMEM);
+            abort();
+    }
     list->pool = p;
     apr_pool_cleanup_register(list->pool, list, alloc_cleanup,
                               apr_pool_cleanup_null);
@@ -113,6 +122,37 @@ APU_DECLARE_NONSTD(void) apr_bucket_alloc_destroy(apr_bucket_alloc_t *list)
 #endif
 }
 
+APU_DECLARE_NONSTD(apr_size_t) apr_bucket_alloc_aligned_floor(apr_bucket_alloc_t *list,
+                                                              apr_size_t size)
+{
+    if (size <= SMALL_NODE_SIZE) {
+        size = SMALL_NODE_SIZE;
+    }
+    else {
+#if APR_VERSION_AT_LEAST(1,6,0)
+        if (size < APR_MEMNODE_T_SIZE) {
+            size = apr_allocator_align(list->allocator, 0);
+        }
+        else {
+            size = apr_allocator_align(list->allocator,
+                                       size - APR_MEMNODE_T_SIZE);
+        }
+#else
+        /* Assumes the minimum (default) allocator's boundary of 4K and
+         * minimum (immutable before APR-1.6.x) allocation size of 8K,
+         * hence possibly (yet unlikely) under-estimating the floor...
+         */
+        size = APR_ALIGN(size, 4096);
+        if (size < 8192) {
+            size = 8192;
+        }
+#endif
+        size -= APR_MEMNODE_T_SIZE;
+    }
+    size -= SIZEOF_NODE_HEADER_T;
+    return size;
+}
+
 APU_DECLARE_NONSTD(void *) apr_bucket_alloc(apr_size_t size, 
                                             apr_bucket_alloc_t *list)
 {
@@ -131,6 +171,7 @@ APU_DECLARE_NONSTD(void *) apr_bucket_alloc(apr_size_t size,
             if (endp >= active->endp) {
                 list->blocks = apr_allocator_alloc(list->allocator, ALLOC_AMT);
                 if (!list->blocks) {
+                    list->blocks = active;
                     return NULL;
                 }
                 list->blocks->next = active;

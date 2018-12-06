@@ -126,15 +126,15 @@ APU_DECLARE_LDAP(int) apr_ldap_set_option(apr_pool_t *pool,
 #endif
 #if APR_HAS_OPENLDAP_LDAPSDK
 #ifdef LDAP_OPT_X_TLS
-        /* This is not a per-connection setting so just pass NULL for the
-           Ldap connection handle */
+		/* This is not a per-connection setting so just pass NULL for the
+		   Ldap connection handle */
         if (*((int*)invalue)) {
-            int i = LDAP_OPT_X_TLS_DEMAND;
-            result->rc = ldap_set_option(NULL, LDAP_OPT_X_TLS_REQUIRE_CERT, &i);
+			int i = LDAP_OPT_X_TLS_DEMAND;
+			result->rc = ldap_set_option(NULL, LDAP_OPT_X_TLS_REQUIRE_CERT, &i);
         }
         else {
-            int i = LDAP_OPT_X_TLS_NEVER;
-            result->rc = ldap_set_option(NULL, LDAP_OPT_X_TLS_REQUIRE_CERT, &i);
+			int i = LDAP_OPT_X_TLS_NEVER;
+			result->rc = ldap_set_option(NULL, LDAP_OPT_X_TLS_REQUIRE_CERT, &i);
         }
 #else
         result->reason = "LDAP: SSL/TLS not yet supported by APR on this "

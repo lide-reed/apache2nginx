@@ -57,10 +57,11 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
     apr_pool_cleanup_register((*new_file)->pool, (void *)(*new_file), file_cleanup,
                         apr_pool_cleanup_null);
 
+#if APR_FILES_AS_SOCKETS
     /* Create a pollset with room for one descriptor. */
     /* ### check return codes */
     (void) apr_pollset_create(&(*new_file)->pollset, 1, p, 0);
-
+#endif
     return APR_SUCCESS;
 #endif /* !defined(_WIN32_WCE) */
 }
@@ -87,7 +88,9 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
              */
             fflush(stderr);
             setvbuf(stderr, NULL, _IONBF, 0);
-            _commit(2 /* stderr */);
+            if (!_isatty(2)) {
+                _commit(2 /* stderr */);
+            }
 
             /* Clone a handle can _close() without harming the source handle,
              * open an MSVCRT-based pseudo-fd for the file handle, then dup2
@@ -117,7 +120,9 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
             /* For the process flow see the stderr case above */
             fflush(stdout);
             setvbuf(stdout, NULL, _IONBF, 0);
-            _commit(1 /* stdout */);
+            if (!_isatty(1)) {
+                _commit(1 /* stdout */);
+            }
 
             if (!DuplicateHandle(hproc, old_file->filehand, hproc, &newhand,
                                  0, FALSE, DUPLICATE_SAME_ACCESS)) {
@@ -133,7 +138,6 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
             /* For the process flow see the stderr case above */
             fflush(stdin);
             setvbuf(stdin, NULL, _IONBF, 0);
-            _commit(0 /* stdin */);
 
             if (!DuplicateHandle(hproc, old_file->filehand, hproc, &newhand,
                                  0, FALSE, DUPLICATE_SAME_ACCESS)) {
@@ -186,8 +190,7 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
                                             apr_file_t *old_file,
                                             apr_pool_t *p)
 {
-    *new_file = (apr_file_t *)apr_palloc(p, sizeof(apr_file_t));
-    memcpy(*new_file, old_file, sizeof(apr_file_t));
+    *new_file = (apr_file_t *)apr_pmemdup(p, old_file, sizeof(apr_file_t));
     (*new_file)->pool = p;
     if (old_file->buffered) {
         (*new_file)->buffer = apr_palloc(p, old_file->bufsize);
@@ -217,9 +220,10 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
     apr_pool_cleanup_kill(old_file->pool, (void *)old_file,
                           file_cleanup);
 
+#if APR_FILES_AS_SOCKETS
     /* Create a pollset with room for one descriptor. */
     /* ### check return codes */
     (void) apr_pollset_create(&(*new_file)->pollset, 1, p, 0);
-
+#endif
     return APR_SUCCESS;
 }

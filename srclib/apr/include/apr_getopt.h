@@ -148,8 +148,8 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
  * at the end (the original argv is unaffected).
  */
 APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
-                      const apr_getopt_option_t *opts,
-                      int *option_ch,
+					  const apr_getopt_option_t *opts,
+					  int *option_ch,
                                           const char **option_arg);
 /** @} */
 

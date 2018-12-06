@@ -38,6 +38,9 @@
  */
 
 
+#define APU_COPYRIGHT "Copyright (c) 2000-2016 The Apache Software " \
+                      "Foundation or its licensors, as applicable."
+
 /* The numeric compile-time version constants. These constants are the
  * authoritative version numbers for APU. 
  */
@@ -53,7 +56,7 @@
  * Minor API changes that do not cause binary compatibility problems.
  * Reset to 0 when upgrading APU_MAJOR_VERSION
  */
-#define APU_MINOR_VERSION       4
+#define APU_MINOR_VERSION       6
 
 /** patch level 
  * The Patch Level never includes API changes, simply bug fixes.
@@ -66,12 +69,14 @@
  * "development" copies of APU.  It is undefined for released versions
  * of APU.
  */
-/* #define APU_IS_DEV_VERSION */
+/* #undef APU_IS_DEV_VERSION */
 
 
 #if defined(APU_IS_DEV_VERSION) || defined(DOXYGEN)
 /** Internal: string form of the "is dev" flag */
+#ifndef APU_IS_DEV_STRING
 #define APU_IS_DEV_STRING "-dev"
+#endif
 #else
 #define APU_IS_DEV_STRING ""
 #endif

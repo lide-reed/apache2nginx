@@ -21,7 +21,7 @@
 
 /* The only case where we don't use wait_for_io_or_timeout is on
  * pre-BONE BeOS, so this check should be sufficient and simpler */
-#if !BEOS_R5
+#if !defined(BEOS_R5)
 #define USE_WAIT_FOR_IO
 #endif
 
@@ -387,6 +387,8 @@ APR_DECLARE(apr_status_t) apr_file_datasync(apr_file_t *thefile)
 
 #ifdef HAVE_FDATASYNC
     if (fdatasync(thefile->filedes)) {
+#elif defined(F_FULLFSYNC)
+    if (fcntl(thefile->filedes, F_FULLFSYNC)) {
 #else
     if (fsync(thefile->filedes)) {
 #endif

@@ -10,7 +10,7 @@
 #   or with special parameters
 # TESTALL_COMPONENTS
 #   programs such as globalmutexchild which the various TESTS will invoke
-#   to validate process creation, pipes, dso mechansims and so forth
+#   to validate process creation, pipes, dso mechanisms and so forth
 
 # Windows Specific;
 # MODEL
@@ -98,13 +98,14 @@ ALL_TESTS = $(INTDIR)\testutil.obj $(INTDIR)\testtime.obj \
 	$(INTDIR)\testsock.obj $(INTDIR)\testglobalmutex.obj \
 	$(INTDIR)\teststrnatcmp.obj $(INTDIR)\testfilecopy.obj \
 	$(INTDIR)\testtemp.obj $(INTDIR)\testlfs.obj \
-	$(INTDIR)\testcond.obj
+	$(INTDIR)\testcond.obj $(INTDIR)\testescape.obj \
+	$(INTDIR)\testskiplist.obj
 
 CLEAN_DATA = testfile.tmp lfstests\large.bin \
 	data\testputs.txt data\testbigfprintf.dat \
 	data\testwritev.txt data\testwritev_full.txt \
 	data\testflush.dat data\testxthread.dat \
-	data\apr.testshm.shm
+	data\apr.testshm.shm lfstests\buffer.bin
 
 CLEAN_BUILDDIRS = Debug Release LibD LibR 9x x64
 

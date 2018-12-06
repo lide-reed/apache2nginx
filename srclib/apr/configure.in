@@ -8,7 +8,6 @@ AC_PREREQ(2.59)
 
 AC_INIT(build/apr_common.m4)
 AC_CONFIG_HEADER(include/arch/unix/apr_private.h)
-AC_CONFIG_MACRO_DIR(build)
 AC_CONFIG_AUX_DIR(build)
 AC_CONFIG_MACRO_DIR(build)
 
@@ -36,7 +35,7 @@ AH_TOP([
 dnl Hard-coded inclusion at the tail end of apr_private.h:
 AH_BOTTOM([
 /* switch this on if we have a BeOS version below BONE */
-#if BEOS && !HAVE_BONE_VERSION
+#if defined(BEOS) && !defined(HAVE_BONE_VERSION)
 #define BEOS_R5 1
 #else
 #define BEOS_BONE 1
@@ -273,8 +272,8 @@ AC_PROG_LIBTOOL
     ;;
 esac
 
-AC_ARG_WITH(installbuilddir, [  --with-installbuilddir=DIR location to store APR build files (defaults to '${datadir}/build')],
-  [ installbuilddir=$withval ], [ installbuilddir="${datadir}/build-${APR_MAJOR_VERSION}" ] )
+AC_ARG_WITH(installbuilddir, [  --with-installbuilddir=DIR location to store APR build files],
+  [ installbuilddir=$withval ] )
 AC_SUBST(installbuilddir)
 
 AC_ARG_WITH(libtool, [  --without-libtool       avoid using libtool to link the library],
@@ -283,7 +282,7 @@ AC_ARG_WITH(libtool, [  --without-libtool       avoid using libtool to link the 
 if test "x$use_libtool" = "xyes"; then
       lt_compile='$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -o $@ -c $< && touch $@'
       LT_VERSION="-version-info `$get_version libtool $version_hdr APR`"
-      link="\$(LIBTOOL) \$(LTFLAGS) --mode=link \$(LT_LDFLAGS) \$(COMPILE) \$(LT_VERSION) \$(ALL_LDFLAGS) -o \$@"
+      link="\$(LIBTOOL) \$(LTFLAGS) --mode=link \$(COMPILE) \$(LT_LDFLAGS) \$(LT_VERSION) \$(ALL_LDFLAGS) -o \$@"
       so_ext='lo'
       lib_target='-rpath $(libdir) $(OBJECTS)'
       export_lib_target='-rpath \$(libdir) \$(OBJECTS)'
@@ -298,6 +297,9 @@ fi
 case $host in
     *-solaris2*)
         apr_platform_runtime_link_flag="-R"
+        ;;
+    *-mingw* | *-cygwin*)
+        LT_LDFLAGS="$LT_LDFLAGS -no-undefined"
         ;;
     *)
         ;;
@@ -344,6 +346,11 @@ AC_ARG_ENABLE(maintainer-mode,[  --enable-maintainer-mode  Turn on debugging and
   [APR_ADDTO(CFLAGS,-g)
    if test "$GCC" = "yes"; then
      APR_ADDTO(CFLAGS,[-Wall -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations])
+      case `($CC --version) 2>/dev/null` in
+        *clang-900* | *"clang version 5.0.0"*)
+          APR_ADDTO(CFLAGS,[-Wno-error=strict-prototypes])
+          ;;
+      esac
    elif test "$AIX_XLC" = "yes"; then
      APR_ADDTO(CFLAGS,-qfullpath -qinitauto=FE -qcheck=all -qinfo=pro)
    fi
@@ -433,6 +440,18 @@ case "$host:$CC" in
 	APR_SETVAR(CC,mwcc)
 	APR_SETVAR(AR,ar)
 	;;
+    dnl If building static APR, both the APR build and the app build
+    dnl need -DAPR_DECLARE_STATIC to generate the right linkage from    
+    dnl APR_DECLARE et al.
+    dnl If building dynamic APR, the APR build needs APR_DECLARE_EXPORT
+    dnl and the app build should have neither define.
+    *-mingw* | *-cygwin*)
+        if test "$enable_shared" = "yes"; then
+            APR_ADDTO(INTERNAL_CPPFLAGS, -DAPR_DECLARE_EXPORT)
+        else
+            APR_ADDTO(CPPFLAGS, -DAPR_DECLARE_STATIC)
+        fi
+        ;;
 esac
 
 AC_CACHE_CHECK([whether the compiler provides atomic builtins], [ap_cv_atomic_builtins],
@@ -532,6 +551,11 @@ case $host in
              ;;
        esac
        ;;
+   *apple-darwin*)
+       ac_cv_func_fdatasync="no" # Mac OS X wrongly reports it has fdatasync()
+       OSDIR="unix"
+       eolstr="\\n"
+       ;;
    *os390)
        OSDIR="os390"
        OBJECTS_PLATFORM='$(OBJECTS_os390)'
@@ -556,6 +580,11 @@ case $host in
        ;;
    *hpux10* ) 
        enable_threads="no"
+       OSDIR="unix"
+       eolstr="\\n"
+       ;;
+   *darwin* ) 
+       ac_cv_func_fdatasync="no" # Mac OS X wrongly reports it has fdatasync()
        OSDIR="unix"
        eolstr="\\n"
        ;;
@@ -626,7 +655,20 @@ AC_ARG_ENABLE(nonportable-atomics,
 ],
 [case $host_cpu in
    i[[456]]86) force_generic_atomics=yes ;;
-   *) force_generic_atomics=no ;;
+   *) force_generic_atomics=no
+      case $host in
+         *solaris2.10*)
+            AC_TRY_COMPILE(
+                [#include <atomic.h>],
+                [void *ptr = NULL; atomic_cas_ptr(&ptr, NULL, NULL);],,
+                [force_generic_atomics=yes]
+            )
+            if test $force_generic_atomics = yes; then
+                AC_MSG_NOTICE([nonportable atomic support disabled, system needs Patch-ID 118884 or 118885])
+            fi
+            ;;
+      esac
+      ;;
 esac
 ])
 
@@ -650,7 +692,15 @@ case $host in
         fi
         ;;
     *linux*)
-        os_version=`uname -r | sed -e 's/\(.\)\.\(.\)\.\(.\).*/\1\2\3/'`
+        os_major=[`uname -r | sed -e 's/\([1-9][0-9]*\)\..*/\1/'`]
+        os_minor=[`uname -r | sed -e 's/[1-9][0-9]*\.\([0-9]\+\)\..*/\1/'`]
+        if test $os_major -lt 2 -o \( $os_major -eq 2 -a $os_minor -lt 4 \); then
+            AC_MSG_WARN([Configured for pre-2.4 Linux $os_major.$os_minor])
+            os_pre24linux=1
+        else
+            os_pre24linux=0
+            AC_MSG_NOTICE([Configured for Linux $os_major.$os_minor])
+        fi
         ;;
     *os390)
         os_version=`uname -r | sed -e 's/\.//g'`
@@ -811,6 +861,22 @@ AC_ARG_WITH(efence,
                  [ AC_MSG_ERROR(Electric Fence requested but not detected) ])
   ])
 
+AC_ARG_WITH(valgrind,
+  [  --with-valgrind[[=DIR]]   Enable code to teach valgrind about apr pools
+                          (optionally: set path to valgrind headers) ],
+  [ if test "$withval" != no; then
+      if test "$withval" = yes; then
+        withval=/usr/include/valgrind
+      fi
+      APR_ADDTO(CPPFLAGS, -I$withval)
+      AC_CHECK_HEADERS(valgrind.h memcheck.h)
+      APR_IFALLYES(header:valgrind.h header:memcheck.h,
+        [AC_DEFINE(HAVE_VALGRIND, 1, [Compile in valgrind support]) ],
+        [AC_MSG_ERROR(valgrind headers not found) ]
+      )
+    fi ]
+)
+
 AC_CHECK_FUNCS(sigsuspend, [ have_sigsuspend="1" ], [ have_sigsuspend="0" ])
 AC_CHECK_FUNCS(sigwait, [ have_sigwait="1" ], [ have_sigwait="0" ]) 
 dnl AC_CHECK_FUNCS doesn't work for this on Tru64 since the function
@@ -873,78 +939,47 @@ if test "$apr_cv_dup3" = "yes"; then
    AC_DEFINE([HAVE_DUP3], 1, [Define if dup3 function is supported])
 fi
 
-# test for accept4
+# Test for accept4().  Create a non-blocking socket, bind it to
+# an unspecified port & address (kernel picks), and attempt to
+# call accept4() on it.  If the syscall is wired up (i.e. the
+# kernel is new enough), it should return EAGAIN.
 AC_CACHE_CHECK([for accept4 support], [apr_cv_accept4],
 [AC_TRY_RUN([
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/un.h>
 #include <sys/wait.h>
-#include <signal.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <errno.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
 
-#define A4_SOCK "./apr_accept4_test_socket"
-
-int main()
+int main(int argc, char **argv)
 {
-    pid_t pid;
-    int fd;
-    struct sockaddr_un loc, rem;
-    socklen_t rem_sz;
+    int fd, flags;
+    struct sockaddr_in sin;
 
-    if ((pid = fork())) {
-        int status;
-
-        unlink(A4_SOCK);
-
-        if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
-            goto cleanup_failure2;
-
-        loc.sun_family = AF_UNIX;
-        strncpy(loc.sun_path, A4_SOCK, sizeof(loc.sun_path) - 1);
-
-        if (bind(fd, (struct sockaddr *) &loc,
-                 sizeof(struct sockaddr_un)) == -1)
-            goto cleanup_failure;
-
-        if (listen(fd, 5) == -1)
-            goto cleanup_failure;
-
-        rem_sz = sizeof(struct sockaddr_un);
-        if (accept4(fd, (struct sockaddr *) &rem, &rem_sz, 0) == -1) {
-            goto cleanup_failure;
-        }
-        else {
-            close(fd);
-            waitpid(pid, &status, 0);
-            unlink(A4_SOCK);
-            return 0;
-        }
-
-cleanup_failure:
-        close(fd);
-cleanup_failure2:
-        kill(pid, SIGKILL);
-        waitpid(pid, &status, 0);
-        unlink(A4_SOCK);
+    if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
         return 1;
-    }
-    else {
-        if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
-            return 1; /* this will be bad: we'll hang */
+    flags = fcntl(fd, F_GETFL);
+    if (flags == -1 || fcntl(fd, F_SETFL, flags|O_NONBLOCK) == -1)
+        return 5;
 
-        loc.sun_family = AF_UNIX;
-        strncpy(loc.sun_path, A4_SOCK, sizeof(loc.sun_path) - 1);
+    memset(&sin, 0, sizeof sin);
+    sin.sin_family = AF_INET;
+    
+    if (bind(fd, (struct sockaddr *) &sin, sizeof sin) == -1)
+        return 2;
+    
+    if (listen(fd, 5) == -1)
+        return 3;
 
-        while(connect(fd, (struct sockaddr *) &loc,
-                      sizeof(struct sockaddr_un)) == -1 &&
-              (errno==ENOENT || errno==ECONNREFUSED))
-            ;
-
-        close(fd);
+    if (accept4(fd, NULL, 0, SOCK_NONBLOCK) == 0
+        || errno == EAGAIN || errno == EWOULDBLOCK)
         return 0;
-    }
+
+    return 4;
 }], [apr_cv_accept4=yes], [apr_cv_accept4=no], [apr_cv_accept4=no])])
 
 if test "$apr_cv_accept4" = "yes"; then
@@ -982,6 +1017,25 @@ int main()
 
 if test "$apr_cv_epoll_create1" = "yes"; then
    AC_DEFINE([HAVE_EPOLL_CREATE1], 1, [Define if epoll_create1 function is supported])
+fi
+
+# Check for z/OS async i/o support.  
+AC_CACHE_CHECK([for asio -> message queue support], [apr_cv_aio_msgq],
+[AC_TRY_RUN([
+#define _AIO_OS390
+#include <aio.h>
+
+int main()
+{
+    struct aiocb a;
+
+    a.aio_notifytype = AIO_MSGQ;  /* use IPC message queue for notification */
+
+    return aio_cancel(2, NULL) == -1;
+}], [apr_cv_aio_msgq=yes], [apr_cv_aio_msgq=no], [apr_cv_aio_msgq=no])])
+
+if test "$apr_cv_aio_msgq" = "yes"; then
+   AC_DEFINE([HAVE_AIO_MSGQ], 1, [Define if async i/o supports message q's])
 fi
 
 # test for dup3
@@ -1108,9 +1162,17 @@ case $host in
 #endif";;
 esac
 
-AC_CHECK_HEADERS([sys/types.h sys/mman.h sys/ipc.h sys/mutex.h sys/shm.h sys/file.h kernel/OS.h os2.h windows.h])
+AC_CHECK_HEADERS([sys/types.h sys/mman.h sys/ipc.h sys/mutex.h \
+                  sys/shm.h sys/file.h sys/socket.h kernel/OS.h os2.h windows.h])
+AC_CHECK_HEADERS([net/if.h],[],[],
+[
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#include <net/if.h>
+])
 AC_CHECK_FUNCS([mmap munmap shm_open shm_unlink shmget shmat shmdt shmctl \
-                create_area])
+                create_area mprotect])
 
 APR_CHECK_DEFINE(MAP_ANON, sys/mman.h)
 AC_CHECK_FILE(/dev/zero)
@@ -1181,7 +1243,8 @@ case $host in
         # that it has it.
         # FIXME - find exact 2.3 version that MMANON was fixed in.  It is
         # confirmed fixed in 2.4 series.
-        if test $os_version -le "240"; then
+        if test $os_pre24linux -eq 1; then
+            AC_MSG_WARN([Disabling anon mmap() support for Linux pre-2.4])
             APR_DECISION_OVERRIDE(USE_SHMEM_MMAP_ZERO USE_SHMEM_SHMGET_ANON)
         fi
         ;;
@@ -1245,13 +1308,18 @@ APR_IFALLYES(header:os2.h,
 APR_IFALLYES(header:windows.h,
              [havewin32shm="1"
               APR_DECIDE(USE_SHMEM_WIN32, [Windows shared memory])])
+AC_ARG_ENABLE(posix-shm,
+[  --enable-posix-shm      Use POSIX shared memory (shm_open) if available],
+[
+if test "$havemmapshm" = "1"; then
+  APR_DECISION_OVERRIDE(USE_SHMEM_MMAP_SHM)
+fi
+])
 case $host in
     *linux* ) 
-        # Linux has problems with MM_SHMT_MMANON even though it reports
-        # that it has it.
-        # FIXME - find exact 2.3 version that MMANON was fixed in.  It is
-        # confirmed fixed in 2.4 series.
-        if test $os_version -le "240"; then
+        # Linux pre-2.4 had problems with MM_SHMT_MMANON even though
+        # it reports that it has it.
+        if test $os_pre24linux -eq 1; then
             APR_DECISION_OVERRIDE(USE_SHMEM_MMAP_TMP USE_SHMEM_MMAP_SHM dnl
                                   USE_SHMEM_SHMGET)
         fi
@@ -1348,7 +1416,8 @@ AC_ARG_WITH(sendfile, [  --with-sendfile         Override decision to use sendfi
             ;;
         s390-*-linux-gnu)
             # disable sendfile support for 2.2 on S/390
-            if test $os_version -lt 240; then
+            if test $os_pre24linux -eq 1; then
+                AC_MSG_WARN([Disabled sendfile support for Linux 2.2 on S/390])
                 sendfile="0"
             fi
             ;;
@@ -1383,7 +1452,15 @@ if test "$native_mmap_emul" = "1"; then
     mmap="1"
 fi
 AC_CHECK_FUNCS(memmove, [ have_memmove="1" ], [have_memmove="0" ])
-AC_CHECK_FUNCS([getpass getpassphrase gmtime_r localtime_r mkstemp])
+AC_CHECK_FUNCS([getpass getpassphrase gmtime_r localtime_r])
+case $host in
+    *-hp-hpux*)
+        dnl mkstemp is limited to 26 temporary files (a-z); use APR replacement
+        ;;
+    *)
+        AC_CHECK_FUNCS(mkstemp)
+        ;;
+esac
 
 AC_SUBST(fork)
 AC_SUBST(have_inet_addr)
@@ -1533,13 +1610,34 @@ if test "$netdbh" = "1"; then
 fi
 
 AC_ARG_ENABLE(allocator-uses-mmap,
-  [  --enable-allocator-uses-mmap    Use mmap in apr_allocator instead of malloc (experimental)],
+  [  --enable-allocator-uses-mmap    Use mmap in apr_allocator instead of malloc ],
   [ if test "$enableval" = "yes"; then
         APR_IFALLYES(header:sys/mman.h func:mmap func:munmap define:MAP_ANON,
                      [AC_DEFINE(APR_ALLOCATOR_USES_MMAP, 1,
                                 [Define if apr_allocator should use mmap]) ],
 		     [AC_MSG_ERROR([mmap()/MAP_ANON not supported]) ]
 		    )
+    fi ]
+)
+
+AC_ARG_ENABLE(allocator-guard-pages,
+  [  --enable-allocator-guard-pages  Use guard pages in apr_allocator
+                                  (implies --enable-allocator-uses-mmap) ] ,
+  [ if test "$enableval" = "yes"; then
+        APR_IFALLYES(header:sys/mman.h func:mmap func:munmap func:mprotect define:MAP_ANON,
+                     [AC_DEFINE(APR_ALLOCATOR_GUARD_PAGES, 1,
+                                [Define if apr_allocator should use guard pages]) ],
+                     [AC_MSG_ERROR([mmap()/MAP_ANON/mprotect() not supported]) ]
+                   )
+    fi ]
+)
+
+
+AC_ARG_ENABLE(pool-concurrency-check,
+  [  --enable-pool-concurrency-check Check for concurrent usage of memory pools],
+  [ if test "$enableval" = "yes"; then
+    AC_DEFINE(APR_POOL_CONCURRENCY_CHECK, 1,
+               [Define if pool functions should abort if concurrent usage is detected])
     fi ]
 )
 
@@ -1784,7 +1882,15 @@ APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], off_t, 8)
 if test "${ac_cv_sizeof_off_t}${apr_cv_use_lfs64}" = "4yes"; then
     # Enable LFS
     aprlfs=1
-    AC_CHECK_FUNCS([mmap64 sendfile64 sendfilev64 mkstemp64 readdir64_r])
+    AC_CHECK_FUNCS([mmap64 sendfile64 sendfilev64 readdir64_r])
+    case $host in
+        *-hp-hpux*)
+            dnl mkstemp64 is limited to 26 temporary files (a-z); use APR replacement
+            ;;
+        *)
+            AC_CHECK_FUNCS(mkstemp64)
+            ;;
+    esac
 elif test "${ac_cv_sizeof_off_t}" != "${ac_cv_sizeof_size_t}"; then
     # unsure of using -gt above is as portable, can can't forsee where
     # off_t can legitimately be smaller than size_t
@@ -2649,6 +2755,7 @@ APR_CHECK_NEGATIVE_EAI
 APR_CHECK_WORKING_GETNAMEINFO
 APR_CHECK_SOCKADDR_IN6
 APR_CHECK_SOCKADDR_STORAGE
+APR_CHECK_SOCKADDR_UN
 
 have_ipv6="0"
 if test "$user_disabled_ipv6" = 1; then
@@ -2727,6 +2834,7 @@ AC_SUBST(NOTEST_INCLUDES)
 
 dnl ----------------------------- Construct the files
 
+AC_SUBST(INTERNAL_CPPFLAGS)
 AC_SUBST(LDLIBS)
 AC_SUBST(INCLUDES)
 AC_SUBST(AR)
@@ -2736,13 +2844,20 @@ AC_SUBST(DEFAULT_OSDIR)
 AC_SUBST(EXEEXT)
 AC_SUBST(LIBTOOL_LIBS)
 
-# Use -no-install to link the test programs on all platforms
-# but Darwin, where it would cause the programs to be linked
-# against installed versions of libapr instead of those just
-# built.
+# Use -no-install or -no-fast-install to link the test 
+# programs on all platforms but Darwin, where it would cause
+# the programs to be linked against installed versions of
+# libapr instead of those just built.
 case $host in
-*-apple-darwin*) LT_NO_INSTALL="" ;;
-*) LT_NO_INSTALL="-no-install" ;;
+    *-apple-darwin*)
+        LT_NO_INSTALL=""
+        ;;
+    *-mingw*)
+        LT_NO_INSTALL="-no-fast-install"
+        ;;
+    *)
+        LT_NO_INSTALL="-no-install"
+        ;;
 esac
 AC_SUBST(LT_NO_INSTALL)
 

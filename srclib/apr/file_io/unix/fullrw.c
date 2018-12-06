@@ -25,10 +25,10 @@ APR_DECLARE(apr_status_t) apr_file_read_full(apr_file_t *thefile, void *buf,
     apr_size_t total_read = 0;
 
     do {
-    apr_size_t amt = nbytes;
+	apr_size_t amt = nbytes;
 
-    status = apr_file_read(thefile, buf, &amt);
-    buf = (char *)buf + amt;
+	status = apr_file_read(thefile, buf, &amt);
+	buf = (char *)buf + amt;
         nbytes -= amt;
         total_read += amt;
     } while (status == APR_SUCCESS && nbytes > 0);
@@ -48,10 +48,10 @@ APR_DECLARE(apr_status_t) apr_file_write_full(apr_file_t *thefile,
     apr_size_t total_written = 0;
 
     do {
-    apr_size_t amt = nbytes;
+	apr_size_t amt = nbytes;
 
-    status = apr_file_write(thefile, buf, &amt);
-    buf = (char *)buf + amt;
+	status = apr_file_write(thefile, buf, &amt);
+	buf = (char *)buf + amt;
         nbytes -= amt;
         total_written += amt;
     } while (status == APR_SUCCESS && nbytes > 0);

@@ -15,7 +15,7 @@
  */
 /*
  * Copyright (c) 1990, 1993
- *    The Regents of the University of California.  All rights reserved.
+ *	The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,8 +27,8 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *    This product includes software developed by the University of
- *    California, Berkeley and its contributors.
+ *	This product includes software developed by the University of
+ *	California, Berkeley and its contributors.
  * 4. Neither the name of the University nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
@@ -75,8 +75,7 @@ APR_DECLARE(char *) apr_pstrdup(apr_pool_t *a, const char *s)
         return NULL;
     }
     len = strlen(s) + 1;
-    res = apr_palloc(a, len);
-    memcpy(res, s, len);
+    res = apr_pmemdup(a, s, len);
     return res;
 }
 
@@ -115,7 +114,7 @@ APR_DECLARE(void *) apr_pmemdup(apr_pool_t *a, const void *m, apr_size_t n)
     void *res;
 
     if (m == NULL)
-    return NULL;
+	return NULL;
     res = apr_palloc(a, n);
     memcpy(res, m, n);
     return res;
@@ -262,29 +261,29 @@ APR_DECLARE(apr_int64_t) apr_strtoi64(const char *nptr, char **endptr, int base)
      */
     s = nptr;
     do {
-    c = *s++;
+	c = *s++;
     } while (apr_isspace(c));
     if (c == '-') {
-    neg = 1;
-    c = *s++;
+	neg = 1;
+	c = *s++;
     } else {
-    neg = 0;
-    if (c == '+')
-        c = *s++;
+	neg = 0;
+	if (c == '+')
+	    c = *s++;
     }
     if ((base == 0 || base == 16) &&
-    c == '0' && (*s == 'x' || *s == 'X')) {
-        c = s[1];
-        s += 2;
-        base = 16;
+	c == '0' && (*s == 'x' || *s == 'X')) {
+	    c = s[1];
+	    s += 2;
+	    base = 16;
     }
     if (base == 0)
-    base = c == '0' ? 8 : 10;
+	base = c == '0' ? 8 : 10;
     acc = any = 0;
     if (base < 2 || base > 36) {
-    errno = EINVAL;
+	errno = EINVAL;
         if (endptr != NULL)
-        *endptr = (char *)(any ? s - 1 : nptr);
+	    *endptr = (char *)(any ? s - 1 : nptr);
         return acc;
     }
 
@@ -301,54 +300,54 @@ APR_DECLARE(apr_int64_t) apr_strtoi64(const char *nptr, char **endptr, int base)
     val = 0;
     for ( ; ; c = *s++) {
         if (c >= '0' && c <= '9')
-        c -= '0';
+	    c -= '0';
 #if (('Z' - 'A') == 25)
-    else if (c >= 'A' && c <= 'Z')
-        c -= 'A' - 10;
-    else if (c >= 'a' && c <= 'z')
-        c -= 'a' - 10;
+	else if (c >= 'A' && c <= 'Z')
+	    c -= 'A' - 10;
+	else if (c >= 'a' && c <= 'z')
+	    c -= 'a' - 10;
 #elif APR_CHARSET_EBCDIC
-    else if (c >= 'A' && c <= 'I')
-        c -= 'A' - 10;
-    else if (c >= 'J' && c <= 'R')
-        c -= 'J' - 19;
-    else if (c >= 'S' && c <= 'Z')
-        c -= 'S' - 28;
-    else if (c >= 'a' && c <= 'i')
-        c -= 'a' - 10;
-    else if (c >= 'j' && c <= 'r')
-        c -= 'j' - 19;
-    else if (c >= 's' && c <= 'z')
-        c -= 'z' - 28;
+	else if (c >= 'A' && c <= 'I')
+	    c -= 'A' - 10;
+	else if (c >= 'J' && c <= 'R')
+	    c -= 'J' - 19;
+	else if (c >= 'S' && c <= 'Z')
+	    c -= 'S' - 28;
+	else if (c >= 'a' && c <= 'i')
+	    c -= 'a' - 10;
+	else if (c >= 'j' && c <= 'r')
+	    c -= 'j' - 19;
+	else if (c >= 's' && c <= 'z')
+	    c -= 'z' - 28;
 #else
 #error "CANNOT COMPILE apr_strtoi64(), only ASCII and EBCDIC supported" 
 #endif
-    else
-        break;
-    if (c >= base)
-        break;
-    val *= base;
-        if ( (any < 0)    /* already noted an over/under flow - short circuit */
+	else
+	    break;
+	if (c >= base)
+	    break;
+	val *= base;
+        if ( (any < 0)	/* already noted an over/under flow - short circuit */
            || (neg && (val > acc || (val -= c) > acc)) /* underflow */
            || (!neg && (val < acc || (val += c) < acc))) {       /* overflow */
-            any = -1;    /* once noted, over/underflows never go away */
+            any = -1;	/* once noted, over/underflows never go away */
 #ifdef APR_STRTOI64_OVERFLOW_IS_BAD_CHAR
             break;
 #endif
         } else {
             acc = val;
-        any = 1;
+	    any = 1;
         }
     }
 
     if (any < 0) {
-    acc = neg ? INT64_MIN : INT64_MAX;
-    errno = ERANGE;
+	acc = neg ? INT64_MIN : INT64_MAX;
+	errno = ERANGE;
     } else if (!any) {
-    errno = EINVAL;
+	errno = EINVAL;
     }
     if (endptr != NULL)
-    *endptr = (char *)(any ? s - 1 : nptr);
+	*endptr = (char *)(any ? s - 1 : nptr);
     return (acc);
 #endif
 }
@@ -365,19 +364,19 @@ APR_DECLARE(char *) apr_itoa(apr_pool_t *p, int n)
     char *start = buf + BUFFER_SIZE - 1;
     int negative;
     if (n < 0) {
-    negative = 1;
-    n = -n;
+	negative = 1;
+	n = -n;
     }
     else {
-    negative = 0;
+	negative = 0;
     }
     *start = 0;
     do {
-    *--start = '0' + (n % 10);
-    n /= 10;
+	*--start = '0' + (n % 10);
+	n /= 10;
     } while (n);
     if (negative) {
-    *--start = '-';
+	*--start = '-';
     }
     return start;
 }
@@ -389,19 +388,19 @@ APR_DECLARE(char *) apr_ltoa(apr_pool_t *p, long n)
     char *start = buf + BUFFER_SIZE - 1;
     int negative;
     if (n < 0) {
-    negative = 1;
-    n = -n;
+	negative = 1;
+	n = -n;
     }
     else {
-    negative = 0;
+	negative = 0;
     }
     *start = 0;
     do {
-    *--start = (char)('0' + (n % 10));
-    n /= 10;
+	*--start = (char)('0' + (n % 10));
+	n /= 10;
     } while (n);
     if (negative) {
-    *--start = '-';
+	*--start = '-';
     }
     return start;
 }
@@ -413,19 +412,19 @@ APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, apr_off_t n)
     char *start = buf + BUFFER_SIZE - 1;
     int negative;
     if (n < 0) {
-    negative = 1;
-    n = -n;
+	negative = 1;
+	n = -n;
     }
     else {
-    negative = 0;
+	negative = 0;
     }
     *start = 0;
     do {
-    *--start = '0' + (char)(n % 10);
-    n /= 10;
+	*--start = '0' + (char)(n % 10);
+	n /= 10;
     } while (n);
     if (negative) {
-    *--start = '-';
+	*--start = '-';
     }
     return start;
 }

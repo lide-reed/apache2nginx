@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* This program won't run or check correctly if assert() is disabled. */
+#undef NDEBUG
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
@@ -141,7 +143,7 @@ static void test_mech_mode(apr_lockmech_e mech, const char *mech_name,
 
   if (test_mode == TEST_PROC) {
       printf("  Mutex mechanism `%s' is %sglobal in scope on this platform.\n",
-             mech_name, counter == 1 ? "" : "not ");
+             mech_name, counter == 1 ? "" : "*NOT* ");
   }
   else {
       if (counter != 1) {

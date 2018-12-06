@@ -61,7 +61,7 @@ APR_DECLARE(apr_status_t) apr_socket_send(apr_socket_t *sock, const char *buf,
                                           apr_size_t *len)
 {
     apr_ssize_t rv;
-    
+	
     do {
         rv = send(sock->socketdes, buf, (*len), 0);
     } while (rv == -1 && errno == EINTR);
@@ -203,9 +203,9 @@ APR_DECLARE(apr_status_t) apr_socket_recvfrom(apr_sockaddr_t *from,
         (*len) = 0;
         return errno;
     }
-    
+	
     from->port = ntohs(from->sa.sin.sin_port);
-    
+	
     (*len) = rv;
     if (rv == 0)
         return APR_EOF;

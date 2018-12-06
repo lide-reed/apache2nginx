@@ -126,7 +126,7 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
     unsigned int idx;
 
     for (idx=0; idx<length; idx++)
-    buf[idx] = randbyte();
+	buf[idx] = randbyte();
 
 #elif defined(HAVE_EGD)
     /* use EGD-compatible socket daemon (such as EGD or PRNGd).
@@ -226,22 +226,22 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
 
 #elif defined(HAVE_TRUERAND) /* use truerand */
 
-    extern int randbyte(void);    /* from the truerand library */
+    extern int randbyte(void);	/* from the truerand library */
     unsigned int idx;
 
     /* this will increase the startup time of the server, unfortunately...
      * (generating 20 bytes takes about 8 seconds)
      */
     for (idx=0; idx<length; idx++)
-    buf[idx] = (unsigned char) randbyte();
+	buf[idx] = (unsigned char) randbyte();
 
-#endif    /* DEV_RANDOM */
+#endif	/* DEV_RANDOM */
 
     return APR_SUCCESS;
 }
 
-#undef    STR
-#undef    XSTR
+#undef	STR
+#undef	XSTR
 
 #ifdef OS2
 #include "randbyte_os2.inc"

@@ -141,6 +141,18 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
             apr_set_option(sock, APR_SO_DEBUG, on);
         }
         break;
+    case APR_SO_BROADCAST:
+#ifdef SO_BROADCAST
+        if (on != apr_is_option_set(sock, APR_SO_BROADCAST)) {
+            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_BROADCAST, (void *)&one, sizeof(int)) == -1) {
+                return errno;
+            }
+            apr_set_option(sock, APR_SO_BROADCAST, on);
+        }
+#else
+        return APR_ENOTIMPL;
+#endif
+        break;
     case APR_SO_REUSEADDR:
         if (on != apr_is_option_set(sock, APR_SO_REUSEADDR)) {
             if (setsockopt(sock->socketdes, SOL_SOCKET, SO_REUSEADDR, (void *)&one, sizeof(int)) == -1) {
@@ -318,6 +330,20 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
         return APR_ENOTIMPL;
 #endif
         break;
+    case APR_SO_FREEBIND:
+#if defined(IP_FREEBIND)
+        if (setsockopt(sock->socketdes, SOL_IP, IP_FREEBIND,
+                       (void *)&one, sizeof(int)) == -1) {
+            return errno;
+        }
+        apr_set_option(sock, APR_SO_FREEBIND, on);
+#elif 0 /* defined(IP_BINDANY) ... */
+        /* TODO: insert FreeBSD support here, note family specific
+         * options, IP_BINDANY vs IPV6_BINDANY */
+#else
+        return APR_ENOTIMPL;
+#endif
+        break;
     default:
         return APR_EINVAL;
     }
@@ -381,12 +407,33 @@ apr_status_t apr_gethostname(char *buf, apr_int32_t len, apr_pool_t *cont)
 }
 
 #if APR_HAS_SO_ACCEPTFILTER
-apr_status_t apr_socket_accept_filter(apr_socket_t *sock, char *name, 
-                                      char *args)
+apr_status_t apr_socket_accept_filter(apr_socket_t *sock, char *nonconst_name, 
+                                      char *nonconst_args)
 {
+    /* these should have been const; act like they are */
+    const char *name = nonconst_name;
+    const char *args = nonconst_args;
+
     struct accept_filter_arg af;
-    strncpy(af.af_name, name, 16);
-    strncpy(af.af_arg, args, 256 - 16);
+    socklen_t optlen = sizeof(af);
+
+    /* FreeBSD returns an error if the filter is already set; ignore
+     * this call if we previously set it to the same value.
+     */
+    if ((getsockopt(sock->socketdes, SOL_SOCKET, SO_ACCEPTFILTER,
+                    &af, &optlen)) == 0) {
+        if (!strcmp(name, af.af_name) && !strcmp(args, af.af_arg)) {
+            return APR_SUCCESS;
+        }
+    }
+
+    /* Uhh, at least in FreeBSD 9 the fields are declared as arrays of
+     * these lengths; did sizeof not work in some ancient release?
+     *
+     * FreeBSD kernel sets the last byte to a '\0'.
+     */
+    apr_cpystrn(af.af_name, name, 16);
+    apr_cpystrn(af.af_arg, args, 256 - 16);
 
     if ((setsockopt(sock->socketdes, SOL_SOCKET, SO_ACCEPTFILTER,
           &af, sizeof(af))) < 0) {
@@ -395,3 +442,24 @@ apr_status_t apr_socket_accept_filter(apr_socket_t *sock, char *name,
     return APR_SUCCESS;
 }
 #endif
+
+APR_PERMS_SET_IMPLEMENT(socket)
+{
+#if APR_HAVE_SOCKADDR_UN
+    apr_status_t rv = APR_SUCCESS;
+    apr_socket_t *socket = (apr_socket_t *)thesocket;
+
+    if (socket->local_addr->family == APR_UNIX) {
+        if (!(perms & APR_FPROT_GSETID))
+            gid = -1;
+        if (fchown(socket->socketdes, uid, gid) < 0) {
+            rv = errno;
+        }
+    }
+    else
+        rv = APR_EINVAL;
+    return rv;
+#else
+    return APR_ENOTIMPL;
+#endif
+}

@@ -86,9 +86,9 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
     }
     else {
         DWORD rv = WaitForSingleObject(mutex->handle, INFINITE);
-    if ((rv != WAIT_OBJECT_0) && (rv != WAIT_ABANDONED)) {
+	if ((rv != WAIT_OBJECT_0) && (rv != WAIT_ABANDONED)) {
             return (rv == WAIT_TIMEOUT) ? APR_EBUSY : apr_get_os_error();
-    }
+	}
     }        
     return APR_SUCCESS;
 }
@@ -102,9 +102,9 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
     }
     else {
         DWORD rv = WaitForSingleObject(mutex->handle, 0);
-    if ((rv != WAIT_OBJECT_0) && (rv != WAIT_ABANDONED)) {
+	if ((rv != WAIT_OBJECT_0) && (rv != WAIT_ABANDONED)) {
             return (rv == WAIT_TIMEOUT) ? APR_EBUSY : apr_get_os_error();
-    }
+	}
     }        
     return APR_SUCCESS;
 }

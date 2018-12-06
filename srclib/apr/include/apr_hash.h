@@ -102,7 +102,8 @@ APR_DECLARE(apr_hash_t *) apr_hash_copy(apr_pool_t *pool,
  * @param key Pointer to the key
  * @param klen Length of the key. Can be APR_HASH_KEY_STRING to use the string length.
  * @param val Value to associate with the key
- * @remark If the value is NULL the hash entry is deleted.
+ * @remark If the value is NULL the hash entry is deleted. The key is stored as is,
+ *         and so must have a lifetime at least as long as the hash table's pool.
  */
 APR_DECLARE(void) apr_hash_set(apr_hash_t *ht, const void *key,
                                apr_ssize_t klen, const void *val);
@@ -165,6 +166,27 @@ APR_DECLARE(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi);
  */
 APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi, const void **key, 
                                 apr_ssize_t *klen, void **val);
+
+/**
+ * Get the current entry's key from the iteration state.
+ * @param hi The iteration state
+ * @return The pointer to the key
+ */
+APR_DECLARE(const void*) apr_hash_this_key(apr_hash_index_t *hi);
+
+/**
+ * Get the current entry's key length from the iteration state.
+ * @param hi The iteration state
+ * @return The key length
+ */
+APR_DECLARE(apr_ssize_t) apr_hash_this_key_len(apr_hash_index_t *hi);
+
+/**
+ * Get the current entry's value from the iteration state.
+ * @param hi The iteration state
+ * @return The pointer to the value
+ */
+APR_DECLARE(void*) apr_hash_this_val(apr_hash_index_t *hi);
 
 /**
  * Get the number of key/value pairs in the hash table.
@@ -258,4 +280,4 @@ APR_POOL_DECLARE_ACCESSOR(hash);
 }
 #endif
 
-#endif    /* !APR_HASH_H */
+#endif	/* !APR_HASH_H */

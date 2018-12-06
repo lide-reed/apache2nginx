@@ -42,6 +42,7 @@
  * conventions at compile time.
  */
 
+#if defined(DOXYGEN) || !defined(WIN32)
 /**
  * The public APR-UTIL functions are declared with APU_DECLARE(), so they may
  * use the most appropriate calling convention.  Public APR functions with 
@@ -66,6 +67,19 @@
  * declarations within headers to properly import the variable.
  */
 #define APU_DECLARE_DATA
+#elif defined(APU_DECLARE_STATIC)
+#define APU_DECLARE(type)            type __stdcall
+#define APU_DECLARE_NONSTD(type)     type __cdecl
+#define APU_DECLARE_DATA
+#elif defined(APU_DECLARE_EXPORT)
+#define APU_DECLARE(type)            __declspec(dllexport) type __stdcall
+#define APU_DECLARE_NONSTD(type)     __declspec(dllexport) type __cdecl
+#define APU_DECLARE_DATA             __declspec(dllexport)
+#else
+#define APU_DECLARE(type)            __declspec(dllimport) type __stdcall
+#define APU_DECLARE_NONSTD(type)     __declspec(dllimport) type __cdecl
+#define APU_DECLARE_DATA             __declspec(dllimport)
+#endif
 
 #if !defined(WIN32) || defined(APU_MODULE_DECLARE_STATIC)
 /**
@@ -99,12 +113,12 @@
 #define APU_HAVE_SQLITE3       @apu_have_sqlite3@
 #define APU_HAVE_SQLITE2       @apu_have_sqlite2@
 #define APU_HAVE_ORACLE        @apu_have_oracle@
-#define APU_HAVE_FREETDS       @apu_have_freetds@
 #define APU_HAVE_ODBC          @apu_have_odbc@
 
 #define APU_HAVE_CRYPTO        @apu_have_crypto@
 #define APU_HAVE_OPENSSL       @apu_have_openssl@
 #define APU_HAVE_NSS           @apu_have_nss@
+#define APU_HAVE_COMMONCRYPTO  @apu_have_commoncrypto@
 
 #define APU_HAVE_APR_ICONV     @have_apr_iconv@
 #define APU_HAVE_ICONV         @have_iconv@

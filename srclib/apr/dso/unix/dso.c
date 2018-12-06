@@ -204,12 +204,12 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
     free(symname2);
     if (symbol == NULL) {
         handle->errormsg = "undefined symbol";
-    return APR_ESYMNOTFOUND;
+	return APR_ESYMNOTFOUND;
     }
     retval = NSAddressOfSymbol(symbol);
     if (retval == NULL) {
         handle->errormsg = "cannot resolve symbol";
-    return APR_ESYMNOTFOUND;
+	return APR_ESYMNOTFOUND;
     }
     *ressym = retval;
     return APR_SUCCESS;

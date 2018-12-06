@@ -63,12 +63,12 @@ struct apr_dbd_prepared_t {
 };
 
 #define FREE_ERROR_MSG(dbd) \
-    do { \
-        if(dbd && dbd->errmsg) { \
-            free(dbd->errmsg); \
-            dbd->errmsg = NULL; \
-        } \
-    } while(0);
+	do { \
+		if(dbd && dbd->errmsg) { \
+			free(dbd->errmsg); \
+			dbd->errmsg = NULL; \
+		} \
+	} while(0);
 
 static apr_status_t free_table(void *data)
 {
@@ -152,7 +152,7 @@ static int dbd_sqlite_get_row(apr_pool_t * pool, apr_dbd_results_t * res,
 
     if (row->n >= res->ntuples) {
         *rowp = NULL;
-        apr_pool_cleanup_run(pool, res->res, free_table);
+        apr_pool_cleanup_run(res->pool, res->res, free_table);
         res->res = NULL;
         return -1;
     }

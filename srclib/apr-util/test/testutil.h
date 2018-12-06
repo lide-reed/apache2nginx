@@ -41,6 +41,12 @@ extern apr_pool_t *p;
  * for RV and CONTEXT message. */
 void apr_assert_success(abts_case* tc, const char *context, apr_status_t rv);
 
+void apr_assert_failure(abts_case* tc, const char *context,
+                        apr_status_t rv, int lineno);
+#define APR_ASSERT_FAILURE(tc, ctxt, rv) \
+             apr_assert_failure(tc, ctxt, rv, __LINE__)
+
+
 void initialize(void);
 
 abts_suite *teststrmatch(abts_suite *suite);
@@ -55,11 +61,13 @@ abts_suite *testldap(abts_suite *suite);
 abts_suite *testdbd(abts_suite *suite);
 abts_suite *testdate(abts_suite *suite);
 abts_suite *testmemcache(abts_suite *suite);
+abts_suite *testredis(abts_suite *suite);
 abts_suite *testreslist(abts_suite *suite);
 abts_suite *testqueue(abts_suite *suite);
 abts_suite *testxml(abts_suite *suite);
 abts_suite *testxlate(abts_suite *suite);
 abts_suite *testrmm(abts_suite *suite);
 abts_suite *testdbm(abts_suite *suite);
+abts_suite *testsiphash(abts_suite *suite);
 
 #endif /* APR_TEST_INCLUDES */

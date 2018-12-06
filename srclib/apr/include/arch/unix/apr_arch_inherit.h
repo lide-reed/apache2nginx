@@ -61,4 +61,4 @@ apr_status_t apr_##name##_inherit_unset(apr_##name##_t *the##name)  \
     return APR_SUCCESS;                                             \
 }
 
-#endif    /* ! INHERIT_H */
+#endif	/* ! INHERIT_H */

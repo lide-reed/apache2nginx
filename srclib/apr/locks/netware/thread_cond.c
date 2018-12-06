@@ -38,8 +38,8 @@ APR_DECLARE(apr_status_t) apr_thread_cond_create(apr_thread_cond_t **cond,
     apr_thread_cond_t *new_cond = NULL;
 
     new_cond = (apr_thread_cond_t *)apr_pcalloc(pool, sizeof(apr_thread_cond_t));
-    
-    if(new_cond ==NULL) {
+	
+	if(new_cond ==NULL) {
         return APR_ENOMEM;
     }     
     new_cond->pool = pool;
