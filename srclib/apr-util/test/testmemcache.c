@@ -24,7 +24,7 @@
 #include "apr_network_io.h"
 
 #if APR_HAVE_STDLIB_H
-#include <stdlib.h>        /* for exit() */
+#include <stdlib.h>		/* for exit() */
 #endif
 
 #define HOST "localhost"
@@ -112,8 +112,8 @@ static int randval(apr_uint32_t high)
     double d = 0;
 
     if (firsttime == 0) {
-    srand((unsigned) (getpid()));
-    firsttime = 1;
+	srand((unsigned) (getpid()));
+	firsttime = 1;
     }
 
     d = (double) rand() / ((double) RAND_MAX + 1);
@@ -433,6 +433,7 @@ static void test_memcache_multiget(abts_case * tc, void *data)
   rv = apr_memcache_add_server(memcache, server);
   ABTS_ASSERT(tc, "server add failed", rv == APR_SUCCESS);
   
+  values = apr_hash_make(p);
   tdata = apr_hash_make(p);
   
   create_test_hash(pool, tdata);
@@ -505,17 +506,17 @@ static void test_memcache_setget(abts_case * tc, void *data)
     create_test_hash(pool, tdata);
 
     for (hi = apr_hash_first(p, tdata); hi; hi = apr_hash_next(hi)) {
-    const void *k;
-    void *v;
+	const void *k;
+	void *v;
         const char *key;
 
-    apr_hash_this(hi, &k, NULL, &v);
+	apr_hash_this(hi, &k, NULL, &v);
         key = k;
 
-    rv = apr_memcache_set(memcache, key, v, strlen(v), 0, 27);
-    ABTS_ASSERT(tc, "set failed", rv == APR_SUCCESS);
-    rv = apr_memcache_getp(memcache, pool, key, &result, &len, NULL);
-    ABTS_ASSERT(tc, "get failed", rv == APR_SUCCESS);
+	rv = apr_memcache_set(memcache, key, v, strlen(v), 0, 27);
+	ABTS_ASSERT(tc, "set failed", rv == APR_SUCCESS);
+	rv = apr_memcache_getp(memcache, pool, key, &result, &len, NULL);
+	ABTS_ASSERT(tc, "get failed", rv == APR_SUCCESS);
     }
 
     rv = apr_memcache_getp(memcache, pool, "nothere3423", &result, &len, NULL);
@@ -523,14 +524,14 @@ static void test_memcache_setget(abts_case * tc, void *data)
     ABTS_ASSERT(tc, "get should have failed", rv != APR_SUCCESS);
 
     for (hi = apr_hash_first(p, tdata); hi; hi = apr_hash_next(hi)) {
-    const void *k;
-    const char *key;
+	const void *k;
+	const char *key;
 
-    apr_hash_this(hi, &k, NULL, NULL);
-    key = k;
+	apr_hash_this(hi, &k, NULL, NULL);
+	key = k;
 
-    rv = apr_memcache_delete(memcache, key, 0);
-    ABTS_ASSERT(tc, "delete failed", rv == APR_SUCCESS);
+	rv = apr_memcache_delete(memcache, key, 0);
+	ABTS_ASSERT(tc, "delete failed", rv == APR_SUCCESS);
     }
 }
 
@@ -603,10 +604,10 @@ abts_suite *testmemcache(abts_suite * suite)
     apr_status_t rv;
     suite = ADD_SUITE(suite);
     /* check for a running memcached on the typical port before 
-     * trying to run the tests. succeed silently if we don't find one.
+     * trying to run the tests. succeed if we don't find one.
      */
     rv = check_mc();
-    if(rv == APR_SUCCESS) {
+    if (rv == APR_SUCCESS) {
       abts_run_test(suite, test_memcache_create, NULL);
       abts_run_test(suite, test_memcache_user_funcs, NULL);
       abts_run_test(suite, test_memcache_meta, NULL);
@@ -614,6 +615,11 @@ abts_suite *testmemcache(abts_suite * suite)
       abts_run_test(suite, test_memcache_multiget, NULL);
       abts_run_test(suite, test_memcache_addreplace, NULL);
       abts_run_test(suite, test_memcache_incrdecr, NULL);
+    }
+    else {
+        abts_log_message("Error %d occurred attempting to reach memcached "
+                         "on %s:%d.  Skipping apr_memcache tests...",
+                         rv, HOST, PORT);
     }
 
     return suite;

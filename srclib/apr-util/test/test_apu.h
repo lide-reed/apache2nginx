@@ -75,7 +75,7 @@
     }
 
 #define STD_TEST_NEQ(str, func) \
-    TEST_NEQ(str, func, APR_SUCCESS, "OK", "Failed");
+	TEST_NEQ(str, func, APR_SUCCESS, "OK", "Failed");
 
 #define PRINT_ERROR(rv) \
     { \

@@ -27,27 +27,27 @@ APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new, apr_pool
     }
 
     (*new)->pool = pool;
-    (*new)->attr = (int32)B_NORMAL_PRIORITY;
+	(*new)->attr = (int32)B_NORMAL_PRIORITY;
 
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr, apr_int32_t on)
 {
-    if (on == 1){
-        attr->detached = 1;
-    } else {
-        attr->detached = 0;
-    }    
+	if (on == 1){
+		attr->detached = 1;
+	} else {
+		attr->detached = 0;
+	}    
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr)
 {
-    if (attr->detached == 1){
-        return APR_DETACH;
-    }
-    return APR_NOTDETACH;
+	if (attr->detached == 1){
+		return APR_DETACH;
+	}
+	return APR_NOTDETACH;
 }
 
 APR_DECLARE(apr_status_t) apr_threadattr_stacksize_set(apr_threadattr_t *attr,
@@ -85,10 +85,10 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t
     (*new)->exitval = -1;
 
     /* First we create the new thread...*/
-    if (attr)
-        temp = attr->attr;
-    else
-        temp = B_NORMAL_PRIORITY;
+	if (attr)
+	    temp = attr->attr;
+	else
+	    temp = B_NORMAL_PRIORITY;
 
     stat = apr_pool_create(&(*new)->pool, pool);
     if (stat != APR_SUCCESS) {
@@ -150,7 +150,7 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval, apr_thread_t *th
 
 APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
 {
-    if (suspend_thread(thd->td) == B_NO_ERROR){
+	if (suspend_thread(thd->td) == B_NO_ERROR){
         return APR_SUCCESS;
     }
     else {

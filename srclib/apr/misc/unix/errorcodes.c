@@ -39,6 +39,8 @@ static char *stuffbuffer(char *buf, apr_size_t bufsize, const char *s)
 static char *apr_error_string(apr_status_t statcode)
 {
     switch (statcode) {
+    case APR_ENOSTAT:
+        return "Could not perform a stat on the file.";
     case APR_ENOPOOL:
         return "A new pool could not be created.";
     case APR_EBADDATE:
@@ -73,15 +75,18 @@ static char *apr_error_string(apr_status_t statcode)
         return "The specified IP address is invalid.";
     case APR_EBADMASK:
         return "The specified network mask is invalid.";
-
+    case APR_ESYMNOTFOUND:
+        return "Could not find the requested symbol.";
+    case APR_ENOTENOUGHENTROPY:
+        return "Not enough entropy to continue.";
     case APR_INCHILD:
         return
-        "Your code just forked, and you are currently executing in the "
-        "child process";
+	    "Your code just forked, and you are currently executing in the "
+	    "child process";
     case APR_INPARENT:
         return
-        "Your code just forked, and you are currently executing in the "
-        "parent process";
+	    "Your code just forked, and you are currently executing in the "
+	    "parent process";
     case APR_DETACH:
         return "The specified thread is detached";
     case APR_NOTDETACH:
@@ -110,8 +115,8 @@ static char *apr_error_string(apr_status_t statcode)
         return "Shared memory is implemented using a key system";
     case APR_EINIT:
         return
-        "There is no error, this value signifies an initialized "
-        "error code";
+	    "There is no error, this value signifies an initialized "
+	    "error code";
     case APR_ENOTIMPL:
         return "This function has not been implemented on this platform";
     case APR_EMISMATCH:
@@ -128,10 +133,12 @@ static char *apr_error_string(apr_status_t statcode)
         return "The given path is misformatted or contained invalid characters";
     case APR_EPATHWILD:
         return "The given path contained wildcard characters";
+    case APR_EBUSY:
+        return "The given lock was busy.";
     case APR_EPROC_UNKNOWN:
         return "The process is not recognized.";
     case APR_EGENERAL:
-        return "Internal error";
+        return "Internal error (specific information not available)";
     default:
         return "Error string not specified yet";
     }
@@ -156,7 +163,7 @@ static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err)
                          strerror(apr_canonical_error(err+APR_OS_START_SYSERR)));
   } 
   else if (DosGetMessage(NULL, 0, message, HUGE_STRING_LEN, err,
-             "OSO001.MSG", &len) == 0) {
+			 "OSO001.MSG", &len) == 0) {
       len--;
       message[len] = 0;
       pos = result;
@@ -165,7 +172,7 @@ static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err)
         len = sizeof(result) - 1;
 
       for (c=0; c<len; c++) {
-      /* skip multiple whitespace */
+	  /* skip multiple whitespace */
           while (apr_isspace(message[c]) && apr_isspace(message[c+1]))
               c++;
           *(pos++) = apr_isspace(message[c]) ? ' ' : message[c];
@@ -362,7 +369,7 @@ static char *native_strerror(apr_status_t statcode, char *buf,
 /* glibc style */
 
 /* BeOS has the function available, but it doesn't provide
- * the prototype publically (doh!), so to avoid a build warning
+ * the prototype publicly (doh!), so to avoid a build warning
  * we add a suitable prototype here.
  */
 #if defined(BEOS)

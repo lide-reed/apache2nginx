@@ -52,7 +52,7 @@
  */
 
 static void make_array_core(apr_array_header_t *res, apr_pool_t *p,
-                int nelts, int elt_size, int clear)
+			    int nelts, int elt_size, int clear)
 {
     /*
      * Assure sanity if someone asks for
@@ -71,8 +71,8 @@ static void make_array_core(apr_array_header_t *res, apr_pool_t *p,
 
     res->pool = p;
     res->elt_size = elt_size;
-    res->nelts = 0;        /* No active elements yet... */
-    res->nalloc = nelts;    /* ...but this many allocated */
+    res->nelts = 0;		/* No active elements yet... */
+    res->nalloc = nelts;	/* ...but this many allocated */
 }
 
 APR_DECLARE(int) apr_is_empty_array(const apr_array_header_t *a)
@@ -81,7 +81,7 @@ APR_DECLARE(int) apr_is_empty_array(const apr_array_header_t *a)
 }
 
 APR_DECLARE(apr_array_header_t *) apr_array_make(apr_pool_t *p,
-                        int nelts, int elt_size)
+						int nelts, int elt_size)
 {
     apr_array_header_t *res;
 
@@ -141,32 +141,32 @@ static void *apr_array_push_noclear(apr_array_header_t *arr)
 }
 
 APR_DECLARE(void) apr_array_cat(apr_array_header_t *dst,
-                   const apr_array_header_t *src)
+			       const apr_array_header_t *src)
 {
     int elt_size = dst->elt_size;
 
     if (dst->nelts + src->nelts > dst->nalloc) {
-    int new_size = (dst->nalloc <= 0) ? 1 : dst->nalloc * 2;
-    char *new_data;
+	int new_size = (dst->nalloc <= 0) ? 1 : dst->nalloc * 2;
+	char *new_data;
 
-    while (dst->nelts + src->nelts > new_size) {
-        new_size *= 2;
-    }
+	while (dst->nelts + src->nelts > new_size) {
+	    new_size *= 2;
+	}
 
-    new_data = apr_pcalloc(dst->pool, elt_size * new_size);
-    memcpy(new_data, dst->elts, dst->nalloc * elt_size);
+	new_data = apr_pcalloc(dst->pool, elt_size * new_size);
+	memcpy(new_data, dst->elts, dst->nalloc * elt_size);
 
-    dst->elts = new_data;
-    dst->nalloc = new_size;
+	dst->elts = new_data;
+	dst->nalloc = new_size;
     }
 
     memcpy(dst->elts + dst->nelts * elt_size, src->elts,
-       elt_size * src->nelts);
+	   elt_size * src->nelts);
     dst->nelts += src->nelts;
 }
 
 APR_DECLARE(apr_array_header_t *) apr_array_copy(apr_pool_t *p,
-                        const apr_array_header_t *arr)
+						const apr_array_header_t *arr)
 {
     apr_array_header_t *res =
         (apr_array_header_t *) apr_palloc(p, sizeof(apr_array_header_t));
@@ -187,17 +187,17 @@ APR_DECLARE(apr_array_header_t *) apr_array_copy(apr_pool_t *p,
  */
 
 static APR_INLINE void copy_array_hdr_core(apr_array_header_t *res,
-                       const apr_array_header_t *arr)
+					   const apr_array_header_t *arr)
 {
     res->elts = arr->elts;
     res->elt_size = arr->elt_size;
     res->nelts = arr->nelts;
-    res->nalloc = arr->nelts;    /* Force overflow on push */
+    res->nalloc = arr->nelts;	/* Force overflow on push */
 }
 
 APR_DECLARE(apr_array_header_t *)
     apr_array_copy_hdr(apr_pool_t *p,
-               const apr_array_header_t *arr)
+		       const apr_array_header_t *arr)
 {
     apr_array_header_t *res;
 
@@ -211,8 +211,8 @@ APR_DECLARE(apr_array_header_t *)
 
 APR_DECLARE(apr_array_header_t *)
     apr_array_append(apr_pool_t *p,
-              const apr_array_header_t *first,
-              const apr_array_header_t *second)
+		      const apr_array_header_t *first,
+		      const apr_array_header_t *second)
 {
     apr_array_header_t *res = apr_array_copy_hdr(p, first);
 
@@ -227,8 +227,8 @@ APR_DECLARE(apr_array_header_t *)
  * If sep is non-NUL, it will be inserted between elements as a separator.
  */
 APR_DECLARE(char *) apr_array_pstrcat(apr_pool_t *p,
-                     const apr_array_header_t *arr,
-                     const char sep)
+				     const apr_array_header_t *arr,
+				     const char sep)
 {
     char *cp, *res, **strpp;
     apr_size_t len;
@@ -247,10 +247,10 @@ APR_DECLARE(char *) apr_array_pstrcat(apr_pool_t *p,
         }
         if (++i >= arr->nelts) {
             break;
-    }
+	}
         if (sep) {
             ++len;
-    }
+	}
     }
 
     /* Allocate the required string */
@@ -268,10 +268,10 @@ APR_DECLARE(char *) apr_array_pstrcat(apr_pool_t *p,
         }
         if (++i >= arr->nelts) {
             break;
-    }
+	}
         if (sep) {
             *cp++ = sep;
-    }
+	}
     }
 
     *cp = '\0';
@@ -357,6 +357,14 @@ struct apr_table_t {
     int index_last[TABLE_HASH_SIZE];
 };
 
+/* keep state for apr_table_getm() */
+typedef struct
+{
+    apr_pool_t *p;
+    const char *first;
+    apr_array_header_t *merged;
+} table_getm_t;
+
 /*
  * NOTICE: if you tweak this you should look at is_empty_table() 
  * and table_elts() in alloc.h
@@ -376,7 +384,7 @@ static apr_table_entry_t *do_table_push(const char *func, apr_table_t *t)
 #define table_push(t) do_table_push(NULL, t)
 #endif
 #else /* MAKE_TABLE_PROFILE */
-#define table_push(t)    ((apr_table_entry_t *) apr_array_push_noclear(&(t)->a))
+#define table_push(t)	((apr_table_entry_t *) apr_array_push_noclear(&(t)->a))
 #endif /* MAKE_TABLE_PROFILE */
 
 APR_DECLARE(const apr_array_header_t *) apr_table_elts(const apr_table_t *t)
@@ -410,8 +418,8 @@ APR_DECLARE(apr_table_t *) apr_table_copy(apr_pool_t *p, const apr_table_t *t)
      * have a life span at least as long as p
      */
     if (!apr_pool_is_ancestor(t->a.pool, p)) {
-    fprintf(stderr, "apr_table_copy: t's pool is not an ancestor of p\n");
-    abort();
+	fprintf(stderr, "apr_table_copy: t's pool is not an ancestor of p\n");
+	abort();
     }
 #endif
     make_array_core(&new->a, p, t->a.nalloc, sizeof(apr_table_entry_t), 0);
@@ -468,7 +476,7 @@ APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key)
     int hash;
 
     if (key == NULL) {
-    return NULL;
+	return NULL;
     }
 
     hash = TABLE_HASH(key);
@@ -480,10 +488,10 @@ APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key)
     end_elt = ((apr_table_entry_t *) t->a.elts) + t->index_last[hash];
 
     for (; next_elt <= end_elt; next_elt++) {
-    if ((checksum == next_elt->key_checksum) &&
+	if ((checksum == next_elt->key_checksum) &&
             !strcasecmp(next_elt->key, key)) {
-        return next_elt->val;
-    }
+	    return next_elt->val;
+	}
     }
 
     return NULL;
@@ -510,7 +518,7 @@ APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
     table_end =((apr_table_entry_t *) t->a.elts) + t->a.nelts;
 
     for (; next_elt <= end_elt; next_elt++) {
-    if ((checksum == next_elt->key_checksum) &&
+	if ((checksum == next_elt->key_checksum) &&
             !strcasecmp(next_elt->key, key)) {
 
             /* Found an existing entry with the same key, so overwrite it */
@@ -582,7 +590,7 @@ APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
     table_end =((apr_table_entry_t *) t->a.elts) + t->a.nelts;
 
     for (; next_elt <= end_elt; next_elt++) {
-    if ((checksum == next_elt->key_checksum) &&
+	if ((checksum == next_elt->key_checksum) &&
             !strcasecmp(next_elt->key, key)) {
 
             /* Found an existing entry with the same key, so overwrite it */
@@ -651,7 +659,7 @@ APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key)
     end_elt = ((apr_table_entry_t *) t->a.elts) + t->index_last[hash];
     must_reindex = 0;
     for (; next_elt <= end_elt; next_elt++) {
-    if ((checksum == next_elt->key_checksum) &&
+	if ((checksum == next_elt->key_checksum) &&
             !strcasecmp(next_elt->key, key)) {
 
             /* Found a match: remove this entry, plus any additional
@@ -688,7 +696,7 @@ APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key)
 }
 
 APR_DECLARE(void) apr_table_merge(apr_table_t *t, const char *key,
-                 const char *val)
+				 const char *val)
 {
     apr_table_entry_t *next_elt;
     apr_table_entry_t *end_elt;
@@ -706,11 +714,11 @@ APR_DECLARE(void) apr_table_merge(apr_table_t *t, const char *key,
     end_elt = ((apr_table_entry_t *) t->a.elts) + t->index_last[hash];
 
     for (; next_elt <= end_elt; next_elt++) {
-    if ((checksum == next_elt->key_checksum) &&
+	if ((checksum == next_elt->key_checksum) &&
             !strcasecmp(next_elt->key, key)) {
 
             /* Found an existing entry with the same key, so merge with it */
-        next_elt->val = apr_pstrcat(t->a.pool, next_elt->val, ", ",
+	    next_elt->val = apr_pstrcat(t->a.pool, next_elt->val, ", ",
                                         val, NULL);
             return;
         }
@@ -725,7 +733,7 @@ add_new_elt:
 }
 
 APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
-                  const char *val)
+				  const char *val)
 {
     apr_table_entry_t *next_elt;
     apr_table_entry_t *end_elt;
@@ -734,14 +742,19 @@ APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
 
 #if APR_POOL_DEBUG
     {
-    if (!apr_pool_is_ancestor(apr_pool_find(key), t->a.pool)) {
-        fprintf(stderr, "apr_table_mergen: key not in ancestor pool of t\n");
-        abort();
-    }
-    if (!apr_pool_is_ancestor(apr_pool_find(val), t->a.pool)) {
-        fprintf(stderr, "apr_table_mergen: val not in ancestor pool of t\n");
-        abort();
-    }
+	apr_pool_t *pool;
+	pool = apr_pool_find(key);
+	if ((pool != (apr_pool_t *)key)
+            && (!apr_pool_is_ancestor(pool, t->a.pool))) {
+	    fprintf(stderr, "apr_table_mergen: key not in ancestor pool of t\n");
+	    abort();
+	}
+	pool = apr_pool_find(val);
+	if ((pool != (apr_pool_t *)val)
+            && (!apr_pool_is_ancestor(pool, t->a.pool))) {
+	    fprintf(stderr, "apr_table_mergen: val not in ancestor pool of t\n");
+	    abort();
+	}
     }
 #endif
 
@@ -756,11 +769,11 @@ APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
     end_elt = ((apr_table_entry_t *) t->a.elts) + t->index_last[hash];
 
     for (; next_elt <= end_elt; next_elt++) {
-    if ((checksum == next_elt->key_checksum) &&
+	if ((checksum == next_elt->key_checksum) &&
             !strcasecmp(next_elt->key, key)) {
 
             /* Found an existing entry with the same key, so merge with it */
-        next_elt->val = apr_pstrcat(t->a.pool, next_elt->val, ", ",
+	    next_elt->val = apr_pstrcat(t->a.pool, next_elt->val, ", ",
                                         val, NULL);
             return;
         }
@@ -775,7 +788,7 @@ add_new_elt:
 }
 
 APR_DECLARE(void) apr_table_add(apr_table_t *t, const char *key,
-                   const char *val)
+			       const char *val)
 {
     apr_table_entry_t *elts;
     apr_uint32_t checksum;
@@ -795,7 +808,7 @@ APR_DECLARE(void) apr_table_add(apr_table_t *t, const char *key,
 }
 
 APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
-                const char *val)
+				const char *val)
 {
     apr_table_entry_t *elts;
     apr_uint32_t checksum;
@@ -803,14 +816,14 @@ APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
 
 #if APR_POOL_DEBUG
     {
-    if (!apr_pool_is_ancestor(apr_pool_find(key), t->a.pool)) {
-        fprintf(stderr, "apr_table_addn: key not in ancestor pool of t\n");
-        abort();
-    }
-    if (!apr_pool_is_ancestor(apr_pool_find(val), t->a.pool)) {
-        fprintf(stderr, "apr_table_addn: val not in ancestor pool of t\n");
-        abort();
-    }
+	if (!apr_pool_is_ancestor(apr_pool_find(key), t->a.pool)) {
+	    fprintf(stderr, "apr_table_addn: key not in ancestor pool of t\n");
+	    abort();
+	}
+	if (!apr_pool_is_ancestor(apr_pool_find(val), t->a.pool)) {
+	    fprintf(stderr, "apr_table_addn: val not in ancestor pool of t\n");
+	    abort();
+	}
     }
 #endif
 
@@ -828,8 +841,8 @@ APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
 }
 
 APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
-                         const apr_table_t *overlay,
-                         const apr_table_t *base)
+					     const apr_table_t *overlay,
+					     const apr_table_t *base)
 {
     apr_table_t *res;
 
@@ -839,14 +852,14 @@ APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
      * as long as p
      */
     if (!apr_pool_is_ancestor(overlay->a.pool, p)) {
-    fprintf(stderr,
-        "apr_table_overlay: overlay's pool is not an ancestor of p\n");
-    abort();
+	fprintf(stderr,
+		"apr_table_overlay: overlay's pool is not an ancestor of p\n");
+	abort();
     }
     if (!apr_pool_is_ancestor(base->a.pool, p)) {
-    fprintf(stderr,
-        "apr_table_overlay: base's pool is not an ancestor of p\n");
-    abort();
+	fprintf(stderr,
+		"apr_table_overlay: base's pool is not an ancestor of p\n");
+	abort();
     }
 #endif
 
@@ -1090,6 +1103,10 @@ APR_DECLARE(void) apr_table_compress(apr_table_t *t, unsigned flags)
     int i;
     int dups_found;
 
+    if (flags == APR_OVERLAP_TABLES_ADD) {
+        return;
+    }
+
     if (t->a.nelts <= 1) {
         return;
     }
@@ -1214,7 +1231,7 @@ static void apr_table_cat(apr_table_t *t, const apr_table_t *s)
 }
 
 APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
-                    unsigned flags)
+				    unsigned flags)
 {
     if (a->a.nelts + b->a.nelts == 0) {
         return;
@@ -1232,4 +1249,52 @@ APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
     apr_table_cat(a, b);
 
     apr_table_compress(a, flags);
+}
+
+static int table_getm_do(void *v, const char *key, const char *val)
+{
+    table_getm_t *state = (table_getm_t *) v;
+
+    if (!state->first) {
+        /**
+         * The most common case is a single header, and this is covered by
+         * a fast path that doesn't allocate any memory. On the second and
+         * subsequent header, an array is created and the array concatenated
+         * together to form the final value.
+         */
+        state->first = val;
+    }
+    else {
+        const char **elt;
+        if (!state->merged) {
+            state->merged = apr_array_make(state->p, 10, sizeof(const char *));
+            elt = apr_array_push(state->merged);
+            *elt = state->first;
+        }
+        elt = apr_array_push(state->merged);
+        *elt = val;
+    }
+    return 1;
+}
+
+APR_DECLARE(const char *) apr_table_getm(apr_pool_t *p, const apr_table_t *t,
+        const char *key)
+{
+    table_getm_t state;
+
+    state.p = p;
+    state.first = NULL;
+    state.merged = NULL;
+
+    apr_table_do(table_getm_do, &state, t, key, NULL);
+
+    if (!state.first) {
+        return NULL;
+    }
+    else if (!state.merged) {
+        return state.first;
+    }
+    else {
+        return apr_array_pstrcat(p, state.merged, ',');
+    }
 }

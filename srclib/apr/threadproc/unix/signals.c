@@ -389,7 +389,7 @@ APR_DECLARE(apr_status_t) apr_signal_thread(int(*signal_handler)(int signum))
             return APR_SUCCESS;
         }
 #elif HAVE_SIGSUSPEND
-    sigsuspend(&sig_mask);
+	sigsuspend(&sig_mask);
 #else
 #error No apr_sigwait() and no sigsuspend()
 #endif

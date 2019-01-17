@@ -137,51 +137,6 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
 #ifdef DIRENT_TYPE
     apr_filetype_e type;
 #endif
-#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
-                    && !defined(READDIR_IS_THREAD_SAFE)
-#ifdef APR_USE_READDIR64_R
-    struct dirent64 *retent;
-
-    /* If LFS is enabled and readdir64_r is available, readdir64_r is
-     * used in preference to readdir_r.  This allows directories to be
-     * read which contain a (64-bit) inode number which doesn't fit
-     * into the 32-bit apr_ino_t, iff the caller doesn't actually care
-     * about the inode number (i.e. wanted & APR_FINFO_INODE == 0).
-     * (such inodes may be seen in some wonky NFS environments)
-     *
-     * Similarly, if the d_off field cannot be reprented in a 32-bit
-     * offset, the libc readdir_r() would barf; using readdir64_r
-     * bypasses that case entirely since APR does not care about
-     * d_off. */
-
-    ret = readdir64_r(thedir->dirstruct, thedir->entry, &retent);
-#else
-
-    struct dirent *retent;
-
-    ret = readdir_r(thedir->dirstruct, thedir->entry, &retent);
-#endif
-
-    /* POSIX treats "end of directory" as a non-error case, so ret
-     * will be zero and retent will be set to NULL in that case. */
-    if (!ret && retent == NULL) {
-        ret = APR_ENOENT;
-    }
-
-    /* Solaris is a bit strange, if there are no more entries in the
-     * directory, it returns EINVAL.  Since this is against POSIX, we
-     * hack around the problem here.  EINVAL is possible from other
-     * readdir implementations, but only if the result buffer is too small.
-     * since we control the size of that buffer, we should never have
-     * that problem.
-     */
-    if (ret == EINVAL) {
-        ret = APR_ENOENT;
-    }
-#else
-    /* We're about to call a non-thread-safe readdir() that may
-       possibly set `errno', and the logic below actually cares about
-       errno after the call.  Therefore we need to clear errno first. */
     errno = 0;
     thedir->entry = readdir(thedir->dirstruct);
     if (thedir->entry == NULL) {
@@ -192,7 +147,6 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         else
             ret = errno;
     }
-#endif
 
     /* No valid bit flag to test here - do we want one? */
     finfo->fname = NULL;
@@ -305,9 +259,6 @@ apr_status_t apr_dir_make_recursive(const char *path, apr_fileperms_t perm,
     
     apr_err = apr_dir_make (path, perm, pool); /* Try to make PATH right out */
     
-    if (apr_err == EEXIST) /* It's OK if PATH exists */
-        return APR_SUCCESS;
-    
     if (apr_err == ENOENT) { /* Missing an intermediate dir */
         char *dir;
         
@@ -322,6 +273,14 @@ apr_status_t apr_dir_make_recursive(const char *path, apr_fileperms_t perm,
         if (!apr_err) 
             apr_err = apr_dir_make (path, perm, pool);
     }
+
+    /*
+     * It's OK if PATH exists. Timing issues can lead to the second
+     * apr_dir_make being called on existing dir, therefore this check
+     * has to come last.
+     */
+    if (APR_STATUS_IS_EEXIST(apr_err))
+        return APR_SUCCESS;
 
     return apr_err;
 }

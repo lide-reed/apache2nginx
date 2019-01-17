@@ -43,7 +43,7 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_i
                             APR_UREAD | APR_UWRITE, p)) == APR_SUCCESS) {
 
 
-    if (!(flags & APR_FOPEN_NOCLEANUP)) {
+	if (!(flags & APR_FOPEN_NOCLEANUP)) {
             int flags;
 
             if ((flags = fcntl((*fp)->filedes, F_GETFD)) == -1)
@@ -53,10 +53,10 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_i
             if (fcntl((*fp)->filedes, F_SETFD, flags) == -1)
                 return errno;
 
-        apr_pool_cleanup_register((*fp)->pool, (void *)(*fp),
-                      apr_unix_file_cleanup,
-                      apr_unix_child_file_cleanup);
-    }
+	    apr_pool_cleanup_register((*fp)->pool, (void *)(*fp),
+				      apr_unix_file_cleanup,
+				      apr_unix_child_file_cleanup);
+	}
     }
 
     return rv;

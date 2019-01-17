@@ -45,7 +45,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "../include" /I "../../apr/include" /I "../include/private" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_OPENSSL=1 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_crypto_openssl_src" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "../include" /I "../../apr/include" /I "../include/private" /I "../../openssl/inc32" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_OPENSSL=1 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_crypto_openssl_src" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -54,8 +54,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libeay32.lib ssleay32.lib /nologo /base:"0x6F100000" /subsystem:windows /dll /incremental:no /debug /opt:ref
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libeay32.lib ssleay32.lib /nologo /base:"0x6F100000" /subsystem:windows /dll /incremental:no /debug /out:"Release\apr_crypto_openssl-1.dll" /pdb:"Release\apr_crypto_openssl-1.pdb" /implib:"Release\apr_crypto_openssl-1.lib" /MACHINE:X86 /opt:ref
+# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libeay32.lib ssleay32.lib /libpath:..\..\openssl\out32dll /nologo /base:"0x6F100000" /subsystem:windows /MACHINE:X86 /dll /incremental:no /debug /opt:ref
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libeay32.lib ssleay32.lib /nologo /libpath:..\..\openssl\out32dll /base:"0x6F100000" /subsystem:windows /MACHINE:X86 /dll /incremental:no /debug /out:"Release\apr_crypto_openssl-1.dll" /pdb:"Release\apr_crypto_openssl-1.pdb" /implib:"Release\apr_crypto_openssl-1.lib" /opt:ref
 # Begin Special Build Tool
 TargetPath=Release\apr_crypto_openssl-1.dll
 SOURCE="$(InputPath)"
@@ -77,7 +77,7 @@ PostBuild_Cmds=if exist $(TargetPath).manifest mt.exe -manifest $(TargetPath).ma
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "../include" /I "../../apr/include" /I "../include/private" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_OPENSSL=1 /D /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_crypto_openssl_src" /FD /EHsc /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "../include" /I "../../apr/include" /I "../include/private" /I "../../openssl/inc32" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_OPENSSL=1 /D /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_crypto_openssl_src" /FD /EHsc /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -86,8 +86,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libeay32.lib ssleay32.lib /nologo /base:"0x6F100000" /subsystem:windows /dll /incremental:no /debug
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libeay32.lib ssleay32.lib /nologo /base:"0x6F100000" /subsystem:windows /dll /incremental:no /debug /out:"Debug\apr_crypto_openssl-1.dll" /pdb:"Debug\apr_crypto_openssl-1.pdb" /implib:"Debug\apr_crypto_openssl-1.lib" /MACHINE:X86
+# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libeay32.lib ssleay32.lib /nologo /libpath:..\..\openssl\out32dll /base:"0x6F100000" /subsystem:windows /MACHINE:X86 /dll /incremental:no /debug
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libeay32.lib ssleay32.lib /nologo /libpath:..\..\openssl\out32dll /base:"0x6F100000" /subsystem:windows /MACHINE:X86 /dll /incremental:no /debug /out:"Debug\apr_crypto_openssl-1.dll" /pdb:"Debug\apr_crypto_openssl-1.pdb" /implib:"Debug\apr_crypto_openssl-1.lib"
 # Begin Special Build Tool
 TargetPath=Debug\apr_crypto_openssl-1.dll
 SOURCE="$(InputPath)"
@@ -108,18 +108,18 @@ PostBuild_Cmds=if exist $(TargetPath).manifest mt.exe -manifest $(TargetPath).ma
 # PROP Intermediate_Dir "x64\Release"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "../include" /I "../../apr/include" /I "../include/private" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_OPENSSL=1 /D /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_crypto_openssl_src" /FD /c
-# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
-# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
+# ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "WIN64" /D "NDEBUG" /D "_WINDOWS" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /Oy- /I "../include" /I "../../apr/include" /I "../include/private" /I "../../openssl/inc32" /D "NDEBUG" /D "WIN32" /D "WIN64" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_OPENSSL=1 /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_crypto_openssl_src" /FD /c
+# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o /x64 "NUL"
+# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o /x64 "NUL"
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
-# ADD RSC /l 0x409 /fo"x64/Release/apr_crypto_openssl-1.res" /d DLL_NAME="apr_crypto_openssl" /d "NDEBUG" /d "APU_VERSION_ONLY" /I "../include" /I "../../apr/include"
+# ADD RSC /l 0x409 /fo"x64\Release/apr_crypto_openssl-1.res" /d DLL_NAME="apr_crypto_openssl" /d "NDEBUG" /d "APU_VERSION_ONLY" /I "../include" /I "../../apr/include"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libeay32.lib ssleay32.lib /nologo /base:"0x6F100000" /subsystem:windows /dll /incremental:no /debug /opt:ref
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libeay32.lib ssleay32.lib /nologo /base:"0x6F100000" /subsystem:windows /dll /incremental:no /debug /out:"x64\Release\apr_crypto_openssl-1.dll" /pdb:"x64\Release\apr_crypto_openssl-1.pdb" /implib:"x64\Release\apr_crypto_openssl-1.lib" /MACHINE:X64 /opt:ref
+# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libeay32.lib ssleay32.lib /nologo /libpath:..\..\openssl\out32dll /base:"0x6F100000" /subsystem:windows /machine:X64 /dll /incremental:no /debug /opt:ref
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libeay32.lib ssleay32.lib /nologo /libpath:..\..\openssl\out32dll /base:"0x6F100000" /subsystem:windows /machine:X64 /dll /incremental:no /debug /out:"x64\Release\apr_crypto_openssl-1.dll" /pdb:"x64\Release\apr_crypto_openssl-1.pdb" /implib:"x64\Release\apr_crypto_openssl-1.lib" /opt:ref
 # Begin Special Build Tool
 TargetPath=x64\Release\apr_crypto_openssl-1.dll
 SOURCE="$(InputPath)"
@@ -140,18 +140,18 @@ PostBuild_Cmds=if exist $(TargetPath).manifest mt.exe -manifest $(TargetPath).ma
 # PROP Intermediate_Dir "x64\Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
-# ADD CPP /nologo /MDd /W3 /Zi /Od /I "../include" /I "../../apr/include" /I "../include/private" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_OPENSSL=1 /D /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_crypto_openssl_src" /FD /EHsc /c
-# ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
-# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
+# ADD BASE CPP /nologo /MDd /W3 /Zi /Od /D "WIN32" /D "WIN64" /D "_DEBUG" /D "_WINDOWS" /FD /EHsc /c
+# ADD CPP /nologo /MDd /W3 /Zi /Od /I "../include" /I "../../apr/include" /I "../include/private" /I "../../openssl/inc32" /D "_DEBUG" /D "WIN32" /D "WIN64" /D "_WINDOWS" /D "APU_DSO_MODULE_BUILD" /D APU_HAVE_OPENSSL=1 /D /Fo"$(INTDIR)\" /Fd"$(INTDIR)\apr_crypto_openssl_src" /FD /EHsc /c
+# ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o /x64 "NUL"
+# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o /x64 "NUL"
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
-# ADD RSC /l 0x409 /fo"x64/Debug/apr_crypto_openssl-1.res" /d DLL_NAME="apr_crypto_openssl" /d "_DEBUG" /d "APU_VERSION_ONLY" /I "../include" /I "../../apr/include"
+# ADD RSC /l 0x409 /fo"x64\Debug/apr_crypto_openssl-1.res" /d DLL_NAME="apr_crypto_openssl" /d "_DEBUG" /d "APU_VERSION_ONLY" /I "../include" /I "../../apr/include"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libeay32.lib ssleay32.lib /nologo /base:"0x6F100000" /subsystem:windows /dll /incremental:no /debug
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libeay32.lib ssleay32.lib /nologo /base:"0x6F100000" /subsystem:windows /dll /incremental:no /debug /out:"x64\Debug\apr_crypto_openssl-1.dll" /pdb:"x64\Debug\apr_crypto_openssl-1.pdb" /implib:"x64\Debug\apr_crypto_openssl-1.lib" /MACHINE:X64
+# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libeay32.lib ssleay32.lib /nologo /libpath:..\..\openssl\out32dll /base:"0x6F100000" /subsystem:windows /machine:X64 /dll /incremental:no /debug
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib libeay32.lib ssleay32.lib /nologo /libpath:..\..\openssl\out32dll /base:"0x6F100000" /subsystem:windows /machine:X64 /dll /incremental:no /debug /out:"x64\Debug\apr_crypto_openssl-1.dll" /pdb:"x64\Debug\apr_crypto_openssl-1.pdb" /implib:"x64\Debug\apr_crypto_openssl-1.lib"
 # Begin Special Build Tool
 TargetPath=x64\Debug\apr_crypto_openssl-1.dll
 SOURCE="$(InputPath)"

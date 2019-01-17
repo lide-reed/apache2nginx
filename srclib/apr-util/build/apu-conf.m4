@@ -121,7 +121,7 @@ AC_DEFUN([APU_SYSTEM_EXPAT], [
 
 
 dnl
-dnl APU_FIND_EXPAT: figure out where EXPAT is located (or use bundled)
+dnl APU_FIND_EXPAT: figure out where EXPAT is located
 dnl
 AC_DEFUN([APU_FIND_EXPAT], [
 
@@ -130,18 +130,14 @@ save_ldflags="$LDFLAGS"
 
 apu_has_expat=0
 
-# Default: will use either external or bundled expat.
 apu_try_external_expat=1
-apu_try_builtin_expat=1
 
 AC_ARG_WITH([expat],
-[  --with-expat=DIR        specify Expat location, or 'builtin'], [
+[  --with-expat=DIR        specify Expat location], [
   if test "$withval" = "yes"; then
     AC_MSG_ERROR([a directory must be specified for --with-expat])
   elif test "$withval" = "no"; then
     AC_MSG_ERROR([Expat cannot be disabled (at this time)])
-  elif test "$withval" = "builtin"; then
-    apu_try_external_expat=0
   else
     # Add given path to standard search paths if appropriate:
     if test "$withval" != "/usr"; then
@@ -150,8 +146,6 @@ AC_ARG_WITH([expat],
       APR_ADDTO(APRUTIL_INCLUDES, [-I$withval/include])
       APR_ADDTO(APRUTIL_LDFLAGS, [-L$withval/lib])
     fi
-    # ...and refuse to fall back on the builtin expat.
-    apu_try_builtin_expat=0
   fi
 ])
 
@@ -159,21 +153,8 @@ if test $apu_try_external_expat = 1; then
   APU_SYSTEM_EXPAT
 fi
 
-if test "${apu_has_expat}${apu_try_builtin_expat}" = "01"; then
-  dnl This is a bit of a hack.  This only works because we know that
-  dnl we are working with the bundled version of the software.
-  bundled_subdir="xml/expat"
-  APR_SUBDIR_CONFIG($bundled_subdir, [--prefix=$prefix --exec-prefix=$exec_prefix --libdir=$libdir --includedir=$includedir --bindir=$bindir])
-  APR_ADDTO(APRUTIL_INCLUDES, [-I$abs_srcdir/$bundled_subdir/lib])
-  APR_ADDTO(LDFLAGS, [-L$top_builddir/$bundled_subdir/lib])
-  apu_expat_libs="$top_builddir/$bundled_subdir/libexpat.la"
-fi
-
 APR_ADDTO(APRUTIL_EXPORT_LIBS, [$apu_expat_libs])
 APR_ADDTO(APRUTIL_LIBS, [$apu_expat_libs])
-
-APR_XML_DIR=$bundled_subdir
-AC_SUBST(APR_XML_DIR)
 
 CPPFLAGS=$save_cppflags
 LDFLAGS=$save_ldflags
@@ -195,7 +176,7 @@ AC_DEFUN([APU_FIND_LDAPLIB], [
     unset ac_cv_lib_${ldaplib_cache_id}___ldap_init
     AC_CHECK_LIB(${ldaplib}, ldap_init, 
       [
-        LDADD_ldap="-l${ldaplib} ${extralib}"
+        LDADD_ldap_found="-l${ldaplib} ${extralib}"
         AC_CHECK_LIB(${ldaplib}, ldapssl_client_init, apu_has_ldapssl_client_init="1", , ${extralib})
         AC_CHECK_LIB(${ldaplib}, ldapssl_client_deinit, apu_has_ldapssl_client_deinit="1", , ${extralib})
         AC_CHECK_LIB(${ldaplib}, ldapssl_add_trusted_cert, apu_has_ldapssl_add_trusted_cert="1", , ${extralib})
@@ -233,7 +214,7 @@ apu_has_ldap_mozilla="0"
 apu_has_ldap_tivoli="0"
 apu_has_ldap_zos="0"
 apu_has_ldap_other="0"
-LDADD_ldap=""
+LDADD_ldap_found=""
 
 AC_ARG_WITH(lber,[  --with-lber=library     lber library to use],
   [
@@ -285,9 +266,13 @@ AC_ARG_WITH(ldap,[  --with-ldap=library     ldap library to use],
         APU_FIND_LDAPLIB($LIBLDAP, "-ldl -lpthread")
       fi
 
-      test ${apu_has_ldap} != "1" && AC_MSG_ERROR(could not find an LDAP library)
+      if test ${apu_has_ldap} != "1"; then
+        AC_MSG_ERROR(could not find an LDAP library)
+      else
+        APR_ADDTO(LDADD_ldap, [$LDADD_ldap_found])
+      fi
       AC_CHECK_LIB($apu_liblber_name, ber_init,
-        [LDADD_ldap="${LDADD_ldap} -l${apu_liblber_name}"])
+        [APR_ADDTO(LDADD_ldap, [-l${apu_liblber_name}])])
 
       AC_CHECK_HEADERS(lber.h, lber_h=["#include <lber.h>"])
 

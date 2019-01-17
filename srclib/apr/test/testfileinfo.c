@@ -115,7 +115,7 @@ static void test_info_get(abts_case *tc, void *data)
     rv = apr_file_info_get(&finfo, APR_FINFO_NORM, thefile);
     if (APR_STATUS_IS_INCOMPLETE(rv)) {
         char *str;
-    int i;
+	int i;
         str = apr_pstrdup(p, "APR_INCOMPLETE:  Missing ");
         for (i = 0; vfi[i].bits; ++i) {
             if (vfi[i].bits & ~finfo.valid) {
@@ -136,7 +136,7 @@ static void test_stat(abts_case *tc, void *data)
     rv = apr_stat(&finfo, FILENAME, APR_FINFO_NORM, p);
     if (APR_STATUS_IS_INCOMPLETE(rv)) {
         char *str;
-    int i;
+	int i;
         str = apr_pstrdup(p, "APR_INCOMPLETE:  Missing ");
         for (i = 0; vfi[i].bits; ++i) {
             if (vfi[i].bits & ~finfo.valid) {
@@ -222,7 +222,7 @@ static void test_mtime_set(abts_case *tc, void *data)
     rv = apr_stat(&finfo, NEWFILENAME, APR_FINFO_MTIME, p);
     if (APR_STATUS_IS_INCOMPLETE(rv)) {
         char *str;
-    int i;
+	int i;
         str = apr_pstrdup(p, "APR_INCOMPLETE:  Missing ");
         for (i = 0; vfi[i].bits; ++i) {
             if (vfi[i].bits & ~finfo.valid) {

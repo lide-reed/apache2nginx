@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <libgen.h>
 #include "apr.h"
 #include "apr_private.h"
 #include "apr_arch_file_io.h"
@@ -371,5 +372,3 @@ APR_DECLARE(apr_status_t) apr_cut_dir_level(char **resolved_dir,
 
     return APR_SUCCESS;
 }
-
-

@@ -120,4 +120,4 @@ APR_DECLARE(apr_status_t) apr_##name##_inherit_unset(apr_##name##_t *the##name)\
 
 #endif /* defined(APR_HAS_UNICODE_FS) */
 
-#endif    /* ! INHERIT_H */
+#endif	/* ! INHERIT_H */

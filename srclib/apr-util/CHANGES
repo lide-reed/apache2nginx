@@ -1,45 +1,66 @@
                                                      -*- coding: utf-8 -*-
-Changes with APR-Util 1.4.1
+Changes with APR-util 1.6.1
 
-  *) Apply Windows build fixes for the apr_crypto API. [Mladen Turk]
+  *) Win32: Add function exports from new apr_crypto API's missing in 1.6.0.
 
-Changes with APR-util 1.4.0
+  *) Win32: Introduce XML_PARSER build-time variable to select the expat
+     library name to be linked to libaprutil-1.dll. See Makefile.win
 
-  *) apr_ldap_init: Pass secure=1 to ldapssl_init() with Solaris LDAP SDK.
-     PR: 42682 [Stefan Fritsch]
+  *) Win32: Removed lingering xml/xml.dsp project forked from the expat
+     Project in the 1.9x era. Use expat's maintained build schema instead,
+     prior to building apr-util.
 
-  *) apr_memcache_server_create: Fix possible segfault. PR 51064.
-     [Michajlo Matijkiw <michajlo_matijkiw comcast com>]
+  *) apr_crypto: Fix compatibility with LibreSSL.  PR 61596.
+     [Bernard Spil <brnrd freebsd.org>, Yann Ylavic]
 
-  *) apr_thread_pool: Fix thread unsafe pool usage. [Stefan Fritsch]
+  *) sdbm: better database/page validation to fail cleanly when corrupted.
+     [Yann Ylavic]
 
-  *) Do not include apr.h and apr_errno.h from system search path in
-     apu_errno.h. PR 46487 [Rainer Jung]
+Changes with APR-util 1.6.0
 
-  *) Add optional dbm, openssl and nss subpackages to the RPM spec file.
-     [Graham Leggett]
+  *) The expat dependency of apr-util is no longer built with apr-util.
+     Install expat (including development headers and libraries) first
+     before building apr-util. [https://libexpat.github.io/]
 
-  *) apr_dbd_freetds: The sybdb.h header file might be freetds/sybdb.h
-     or sybdb.h. [Graham Leggett]
+  *) Mark apr_dbd_freetds as unsupported, and remove it from all builds
+     [Nick Kew]
 
-  *) Add apr_crypto implementations for OpenSSL and Mozilla NSS. Add a unit
-     test to verify the interoperability of the two modules. Builds default
-     to disabled unless explicitly enabled.
-     [Graham Leggett]
+  *) Update MySQL build to stop using libmysqlclient_r.
+     [Petr Sumbera <petr.sumbera oracle.com>]
 
-  *) Add the apr_crypto interface, a rewrite of the earlier apr_ssl code,
-     based on the modular dso interface used for dbd and ldap. Initially,
-     the interface supports symmetrical encryption and decryption. The
-     purpose of the interface is to offer portable and interoperable
-     access to basic crypto using the native crypto libraries present on
-     each platform.  [Graham Leggett]
+  *) apr_buckets: Add apr_bucket_file_set_buf_size() which allows to configure
+     the size of the buffer used to read files.  [Yann Ylavic]
 
-  *) Add trace probes to hooks, making it easier to inspect APR Hook based
-     applications with DTrace or other such mechanisms.
-     [Theo Schlossnagle <jesus omniti.com>, generalized by Jeff Trawick]
+  *) apr_crypto: avoid excessive iteration in bcrypt hash.
+     [Hanno Böck <hanno hboeck.de>]
 
-  *) Implement resource list when threads are unavailable. PR 24325
-     [Bojan Smojver]
+  *) apr_siphash: Implement keyed hash function SipHash.  [Yann Ylavic]
+
+  *) apr_crypto: Add apr_crypto_key() function which supports keys
+     generated from a passphrase or a raw secret provided by the caller.
+     Deprecate apr_crypto_passphrase(). [Graham Leggett]
+
+  *) apr_crypto_nss: Ensure the SECItem returned by PK11_ParamFromIV
+     is properly freed. [Graham Leggett]
+
+  *) apr_crypto: Don't cache the driver if initialisation fails. This
+     stops the second and subsequent attempt to use the API from failing
+     claiming the library is not initialised. [Graham Leggett]
+
+  *) apr_crypto: Add a native CommonCrypto implementation for iOS and OSX
+     where OpenSSL has been deprecated. [Graham Leggett]
+
+  *) apr_xml_to_text: Add style APR_XML_X2T_PARSED to maintain a
+     consistent namespace prefix. [Jari Urpalainen
+     <jari.urpalainen nokia.com>]
+
+Changes with APR-util 1.5.x and later:
+
+  *) http://svn.apache.org/viewvc/apr/apr-util/branches/1.5.x/CHANGES?view=markup
+
+Changes with APR-util 1.4.x and later:
+
+  *) http://svn.apache.org/viewvc/apr/apr-util/branches/1.4.x/CHANGES?view=markup
 
 Changes for APR-util 1.3.x and later:
 

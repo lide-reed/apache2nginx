@@ -259,16 +259,20 @@ FILES_lib_objs = \
 	$(OBJDIR)/apr_md4.o \
 	$(OBJDIR)/apr_md5.o \
 	$(OBJDIR)/apr_memcache.o \
+	$(OBJDIR)/apr_passwd.o \
 	$(OBJDIR)/apr_queue.o \
+	$(OBJDIR)/apr_redis.o \
 	$(OBJDIR)/apr_reslist.o \
 	$(OBJDIR)/apr_rmm.o \
 	$(OBJDIR)/apr_sha1.o \
+	$(OBJDIR)/apr_siphash.o \
 	$(OBJDIR)/apu_version.o \
 	$(OBJDIR)/getuuid.o \
 	$(OBJDIR)/uuid.o \
 	$(OBJDIR)/apr_strmatch.o \
 	$(OBJDIR)/apr_thread_pool.o \
 	$(OBJDIR)/apr_uri.o \
+	$(OBJDIR)/crypt_blowfish.o \
 	$(OBJDIR)/sdbm.o \
 	$(OBJDIR)/sdbm_hash.o \
 	$(OBJDIR)/sdbm_lock.o \
@@ -294,7 +298,7 @@ install :: nlms FORCE
 # Any specialized rules here
 #
 
-vpath %.c buckets:crypto:dbd:dbm:dbm/sdbm:encoding:hooks:ldap:memcache:misc:strmatch:uri:xlate:xml
+vpath %.c buckets:crypto:dbd:dbm:dbm/sdbm:encoding:hooks:ldap:memcache:redis:misc:strmatch:uri:xlate:xml
 
 #
 # Include the 'tail' makefile that has targets that depend on variables defined

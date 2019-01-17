@@ -34,7 +34,7 @@
 #include "apr_ring.h"
 #include "apr.h"
 #if APR_HAVE_SYS_UIO_H
-#include <sys/uio.h>    /* for struct iovec */
+#include <sys/uio.h>	/* for struct iovec */
 #endif
 #if APR_HAVE_STDARG_H
 #include <stdarg.h>
@@ -241,7 +241,7 @@ struct apr_bucket {
      */
     apr_off_t start;
     /** type-dependent data hangs off this pointer */
-    void *data;    
+    void *data;	
     /**
      * Pointer to function used to free the bucket. This function should
      * always be defined and it should be consistent with the memory
@@ -288,10 +288,10 @@ typedef apr_status_t (*apr_brigade_flush)(apr_bucket_brigade *bb, void *ctx);
  */
 #ifdef APR_BUCKET_DEBUG
 
-#define APR_BRIGADE_CHECK_CONSISTENCY(b)                \
+#define APR_BRIGADE_CHECK_CONSISTENCY(b)				\
         APR_RING_CHECK_CONSISTENCY(&(b)->list, apr_bucket, link)
 
-#define APR_BUCKET_CHECK_CONSISTENCY(e)                    \
+#define APR_BUCKET_CHECK_CONSISTENCY(e)					\
         APR_RING_CHECK_ELEM_CONSISTENCY((e), apr_bucket, link)
 
 #else
@@ -328,48 +328,48 @@ typedef apr_status_t (*apr_brigade_flush)(apr_bucket_brigade *bb, void *ctx);
  * @param  b The brigade
  * @return The magic pointer value
  */
-#define APR_BRIGADE_SENTINEL(b)    APR_RING_SENTINEL(&(b)->list, apr_bucket, link)
+#define APR_BRIGADE_SENTINEL(b)	APR_RING_SENTINEL(&(b)->list, apr_bucket, link)
 
 /**
  * Determine if the bucket brigade is empty
  * @param b The brigade to check
  * @return true or false
  */
-#define APR_BRIGADE_EMPTY(b)    APR_RING_EMPTY(&(b)->list, apr_bucket, link)
+#define APR_BRIGADE_EMPTY(b)	APR_RING_EMPTY(&(b)->list, apr_bucket, link)
 
 /**
  * Return the first bucket in a brigade
  * @param b The brigade to query
  * @return The first bucket in the brigade
  */
-#define APR_BRIGADE_FIRST(b)    APR_RING_FIRST(&(b)->list)
+#define APR_BRIGADE_FIRST(b)	APR_RING_FIRST(&(b)->list)
 /**
  * Return the last bucket in a brigade
  * @param b The brigade to query
  * @return The last bucket in the brigade
  */
-#define APR_BRIGADE_LAST(b)    APR_RING_LAST(&(b)->list)
+#define APR_BRIGADE_LAST(b)	APR_RING_LAST(&(b)->list)
 
 /**
- * Insert a list of buckets at the front of a brigade
+ * Insert a single bucket at the front of a brigade
  * @param b The brigade to add to
- * @param e The first bucket in a list of buckets to insert
+ * @param e The bucket to insert
  */
-#define APR_BRIGADE_INSERT_HEAD(b, e) do {                \
-    apr_bucket *ap__b = (e);                                        \
-    APR_RING_INSERT_HEAD(&(b)->list, ap__b, apr_bucket, link);    \
-        APR_BRIGADE_CHECK_CONSISTENCY((b));                \
+#define APR_BRIGADE_INSERT_HEAD(b, e) do {				\
+	apr_bucket *ap__b = (e);                                        \
+	APR_RING_INSERT_HEAD(&(b)->list, ap__b, apr_bucket, link);	\
+        APR_BRIGADE_CHECK_CONSISTENCY((b));				\
     } while (0)
 
 /**
- * Insert a list of buckets at the end of a brigade
+ * Insert a single bucket at the end of a brigade
  * @param b The brigade to add to
- * @param e The first bucket in a list of buckets to insert
+ * @param e The bucket to insert
  */
-#define APR_BRIGADE_INSERT_TAIL(b, e) do {                \
-    apr_bucket *ap__b = (e);                    \
-    APR_RING_INSERT_TAIL(&(b)->list, ap__b, apr_bucket, link);    \
-        APR_BRIGADE_CHECK_CONSISTENCY((b));                \
+#define APR_BRIGADE_INSERT_TAIL(b, e) do {				\
+	apr_bucket *ap__b = (e);					\
+	APR_RING_INSERT_TAIL(&(b)->list, ap__b, apr_bucket, link);	\
+        APR_BRIGADE_CHECK_CONSISTENCY((b));				\
     } while (0)
 
 /**
@@ -377,9 +377,9 @@ typedef apr_status_t (*apr_brigade_flush)(apr_bucket_brigade *bb, void *ctx);
  * @param a The first brigade
  * @param b The second brigade
  */
-#define APR_BRIGADE_CONCAT(a, b) do {                    \
-        APR_RING_CONCAT(&(a)->list, &(b)->list, apr_bucket, link);    \
-        APR_BRIGADE_CHECK_CONSISTENCY((a));                \
+#define APR_BRIGADE_CONCAT(a, b) do {					\
+        APR_RING_CONCAT(&(a)->list, &(b)->list, apr_bucket, link);	\
+        APR_BRIGADE_CHECK_CONSISTENCY((a));				\
     } while (0)
 
 /**
@@ -387,31 +387,31 @@ typedef apr_status_t (*apr_brigade_flush)(apr_bucket_brigade *bb, void *ctx);
  * @param a The first brigade
  * @param b The second brigade
  */
-#define APR_BRIGADE_PREPEND(a, b) do {                    \
-        APR_RING_PREPEND(&(a)->list, &(b)->list, apr_bucket, link);    \
-        APR_BRIGADE_CHECK_CONSISTENCY((a));                \
+#define APR_BRIGADE_PREPEND(a, b) do {					\
+        APR_RING_PREPEND(&(a)->list, &(b)->list, apr_bucket, link);	\
+        APR_BRIGADE_CHECK_CONSISTENCY((a));				\
     } while (0)
 
 /**
- * Insert a list of buckets before a specified bucket
+ * Insert a single bucket before a specified bucket
  * @param a The bucket to insert before
- * @param b The buckets to insert
+ * @param b The bucket to insert
  */
-#define APR_BUCKET_INSERT_BEFORE(a, b) do {                \
-    apr_bucket *ap__a = (a), *ap__b = (b);                \
-    APR_RING_INSERT_BEFORE(ap__a, ap__b, link);            \
-        APR_BUCKET_CHECK_CONSISTENCY(ap__a);                \
+#define APR_BUCKET_INSERT_BEFORE(a, b) do {				\
+	apr_bucket *ap__a = (a), *ap__b = (b);				\
+	APR_RING_INSERT_BEFORE(ap__a, ap__b, link);			\
+        APR_BUCKET_CHECK_CONSISTENCY(ap__a);				\
     } while (0)
 
 /**
- * Insert a list of buckets after a specified bucket
+ * Insert a single bucket after a specified bucket
  * @param a The bucket to insert after
- * @param b The buckets to insert
+ * @param b The bucket to insert
  */
-#define APR_BUCKET_INSERT_AFTER(a, b) do {                \
-    apr_bucket *ap__a = (a), *ap__b = (b);                \
-    APR_RING_INSERT_AFTER(ap__a, ap__b, link);            \
-        APR_BUCKET_CHECK_CONSISTENCY(ap__a);                \
+#define APR_BUCKET_INSERT_AFTER(a, b) do {				\
+	apr_bucket *ap__a = (a), *ap__b = (b);				\
+	APR_RING_INSERT_AFTER(ap__a, ap__b, link);			\
+        APR_BUCKET_CHECK_CONSISTENCY(ap__a);				\
     } while (0)
 
 /**
@@ -419,25 +419,25 @@ typedef apr_status_t (*apr_brigade_flush)(apr_bucket_brigade *bb, void *ctx);
  * @param e The current bucket
  * @return The next bucket
  */
-#define APR_BUCKET_NEXT(e)    APR_RING_NEXT((e), link)
+#define APR_BUCKET_NEXT(e)	APR_RING_NEXT((e), link)
 /**
  * Get the previous bucket in the list
  * @param e The current bucket
  * @return The previous bucket
  */
-#define APR_BUCKET_PREV(e)    APR_RING_PREV((e), link)
+#define APR_BUCKET_PREV(e)	APR_RING_PREV((e), link)
 
 /**
  * Remove a bucket from its bucket brigade
  * @param e The bucket to remove
  */
-#define APR_BUCKET_REMOVE(e)    APR_RING_REMOVE((e), link)
+#define APR_BUCKET_REMOVE(e)	APR_RING_REMOVE((e), link)
 
 /**
  * Initialize a new bucket's prev/next pointers
  * @param e The bucket to initialize
  */
-#define APR_BUCKET_INIT(e)    APR_RING_ELEM_INIT((e), link)
+#define APR_BUCKET_INIT(e)	APR_RING_ELEM_INIT((e), link)
 
 /**
  * Determine if a bucket contains metadata.  An empty bucket is
@@ -622,6 +622,8 @@ struct apr_bucket_file {
      *  a caller tries to read from it */
     int can_mmap;
 #endif /* APR_HAS_MMAP */
+    /** File read block size */
+    apr_size_t read_size;
 };
 
 /** @see apr_bucket_structs */
@@ -687,9 +689,10 @@ APU_DECLARE(apr_status_t) apr_brigade_cleanup(void *data);
  * @param b The brigade to split
  * @param e The first bucket to move
  * @param a The brigade which should be used for the result or NULL if
- *          a new brigade should be created.
- * @return The brigade supplied in @param a or a new one if @param a was NULL.
- * @warning Note that this function allocates a new brigade if @param a is
+ *          a new brigade should be created. The brigade @a a will be
+ *          cleared if it is not empty.
+ * @return The brigade supplied in @a a or a new one if @a a was NULL.
+ * @warning Note that this function allocates a new brigade if @a a is
  * NULL so memory consumption should be carefully considered.
  */
 APU_DECLARE(apr_bucket_brigade *) apr_brigade_split_ex(apr_bucket_brigade *b,
@@ -699,8 +702,8 @@ APU_DECLARE(apr_bucket_brigade *) apr_brigade_split_ex(apr_bucket_brigade *b,
 /**
  * Create a new bucket brigade and move the buckets from the tail end
  * of an existing brigade into the new brigade.  Buckets from 
- * @param e to the last bucket (inclusively) of brigade @param b
- * are moved from @param b to the returned brigade.
+ * @a e to the last bucket (inclusively) of brigade @a b
+ * are moved from @a b to the returned brigade.
  * @param b The brigade to split 
  * @param e The first bucket to move
  * @return The new brigade
@@ -961,6 +964,18 @@ APU_DECLARE_NONSTD(apr_bucket_alloc_t *) apr_bucket_alloc_create_ex(apr_allocato
 APU_DECLARE_NONSTD(void) apr_bucket_alloc_destroy(apr_bucket_alloc_t *list);
 
 /**
+ * Get the aligned size corresponding to the requested size, but minus the
+ * allocator(s) overhead such that the allocation would remain in the
+ * same boundary.
+ * @param list The allocator from which to the memory would be allocated.
+ * @param size The requested size.
+ * @return The corresponding aligned/floored size.
+ */
+APU_DECLARE_NONSTD(apr_size_t) apr_bucket_alloc_aligned_floor(apr_bucket_alloc_t *list,
+                                                              apr_size_t size)
+                         __attribute__((nonnull(1)));
+
+/**
  * Allocate memory for use by the buckets.
  * @param size The amount to allocate.
  * @param list The allocator from which to allocate the memory.
@@ -981,9 +996,9 @@ APU_DECLARE_NONSTD(void) apr_bucket_free(void *block);
  * @see apr_bucket_delete()
  * @param e The bucket to destroy
  */
-#define apr_bucket_destroy(e) do {                    \
-        (e)->type->destroy((e)->data);                    \
-        (e)->free(e);                            \
+#define apr_bucket_destroy(e) do {					\
+        (e)->type->destroy((e)->data);					\
+        (e)->free(e);							\
     } while (0)
 
 /**
@@ -997,9 +1012,9 @@ APU_DECLARE_NONSTD(void) apr_bucket_free(void *block);
  * </pre>
  * @param e The bucket to delete
  */
-#define apr_bucket_delete(e) do {                    \
-        APR_BUCKET_REMOVE(e);                        \
-        apr_bucket_destroy(e);                        \
+#define apr_bucket_delete(e) do {					\
+        APR_BUCKET_REMOVE(e);						\
+        apr_bucket_destroy(e);						\
     } while (0)
 
 /**
@@ -1265,7 +1280,7 @@ APU_DECLARE_NONSTD(apr_status_t) apr_bucket_simple_copy(apr_bucket *a,
  * @return The new bucket, or NULL if allocation failed
  */
 APU_DECLARE(apr_bucket *) apr_bucket_shared_make(apr_bucket *b, void *data,
-                                 apr_off_t start, 
+				                 apr_off_t start, 
                                                  apr_size_t length);
 
 /**
@@ -1561,6 +1576,19 @@ APU_DECLARE(apr_bucket *) apr_bucket_file_make(apr_bucket *b, apr_file_t *fd,
  */
 APU_DECLARE(apr_status_t) apr_bucket_file_enable_mmap(apr_bucket *b,
                                                       int enabled);
+
+/**
+ * Set the size of the read buffer allocated by a FILE bucket (default
+ * is @a APR_BUCKET_BUFF_SIZE)
+ * memory-mapping is disabled only)
+ * @param b The bucket
+ * @param size Size of the allocated buffers
+ * @return APR_SUCCESS normally, or an error code if the operation fails
+ * @remark Relevant/used only when memory-mapping is disabled (@see
+ * apr_bucket_file_enable_mmap)
+ */
+APU_DECLARE(apr_status_t) apr_bucket_file_set_buf_size(apr_bucket *e,
+                                                       apr_size_t size);
 
 /** @} */
 #ifdef __cplusplus

@@ -183,7 +183,7 @@ static void test_dbd_sqlite2(abts_case *tc, void *data)
     ABTS_ASSERT(tc, "failed to fetch sqlite2 driver", rv == APR_SUCCESS);
     ABTS_PTR_NOTNULL(tc, driver);
     if (!driver) {
-        return;
+    	return;
     }
 
     ABTS_STR_EQUAL(tc, "sqlite2", apr_dbd_name(driver));
@@ -192,7 +192,7 @@ static void test_dbd_sqlite2(abts_case *tc, void *data)
     ABTS_ASSERT(tc, "failed to open sqlite2 atabase", rv == APR_SUCCESS);
     ABTS_PTR_NOTNULL(tc, handle);
     if (!handle) {
-        return;
+    	return;
     }
 
     test_dbd_generic(tc, handle, driver);
@@ -211,7 +211,7 @@ static void test_dbd_sqlite3(abts_case *tc, void *data)
     ABTS_ASSERT(tc, "failed to fetch sqlite3 driver", rv == APR_SUCCESS);
     ABTS_PTR_NOTNULL(tc, driver);
     if (!driver) {
-        return;
+    	return;
     }
 
     ABTS_STR_EQUAL(tc, "sqlite3", apr_dbd_name(driver));
@@ -220,7 +220,7 @@ static void test_dbd_sqlite3(abts_case *tc, void *data)
     ABTS_ASSERT(tc, "failed to open sqlite3 database", rv == APR_SUCCESS);
     ABTS_PTR_NOTNULL(tc, handle);
     if (!handle) {
-        return;
+    	return;
     }
 
     test_dbd_generic(tc, handle, driver);

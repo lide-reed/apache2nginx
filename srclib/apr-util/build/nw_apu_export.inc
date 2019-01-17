@@ -33,6 +33,7 @@
 #include "apr_rmm.h"
 #include "apr_sdbm.h"
 #include "apr_sha1.h"
+#include "apr_siphash.h"
 #include "apr_strmatch.h"
 #include "apr_thread_pool.h"
 #include "apr_uri.h"

@@ -44,8 +44,7 @@ if test "x$apr_preload_done" != "xyes" ; then
 
   case "$host" in
     *mint)
-	APR_ADDTO(CPPFLAGS, [-DMINT])
-	APR_ADDTO(LIBS, [-lportlib])
+	APR_ADDTO(CPPFLAGS, [-DMINT -D_GNU_SOURCE])
 	;;
     *MPE/iX*)
 	APR_ADDTO(CPPFLAGS, [-DMPE -D_POSIX_SOURCE -D_SOCKET_SOURCE])
@@ -119,18 +118,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(CPPFLAGS, [-DHPUX -D_REENTRANT])
 	;;
     *-linux*)
-        case `uname -r` in
-	    2.* )  APR_ADDTO(CPPFLAGS, [-DLINUX=2])
-	           ;;
-	    1.* )  APR_ADDTO(CPPFLAGS, [-DLINUX=1])
-	           ;;
-	    * )
-	           ;;
-        esac
-	APR_ADDTO(CPPFLAGS, [-D_REENTRANT -D_GNU_SOURCE])
-	;;
-    *-GNU*)
-	APR_ADDTO(CPPFLAGS, [-DHURD -D_GNU_SOURCE])
+	APR_ADDTO(CPPFLAGS, [-DLINUX -D_REENTRANT -D_GNU_SOURCE])
 	;;
     *-lynx-lynxos)
 	APR_ADDTO(CPPFLAGS, [-D__NO_INCLUDE_WARN__ -DLYNXOS])
@@ -180,6 +168,9 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-k*bsd*-gnu)
         APR_ADDTO(CPPFLAGS, [-D_REENTRANT -D_GNU_SOURCE])
         ;;
+    *-gnu*|*-GNU*)
+        APR_ADDTO(CPPFLAGS, [-D_REENTRANT -D_GNU_SOURCE -DHURD])
+        ;;
     *-next-nextstep*)
 	APR_SETIFNULL(CFLAGS, [-O])
 	APR_ADDTO(CPPFLAGS, [-DNEXT])
@@ -192,7 +183,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(CPPFLAGS, [-DRHAPSODY])
 	;;
     *-apple-darwin*)
-        APR_ADDTO(CPPFLAGS, [-DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK -no-cpp-precomp])
+        APR_ADDTO(CPPFLAGS, [-DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK])
         APR_SETIFNULL(apr_posixsem_is_global, [yes])
         case $host in
             *-apple-darwin[[1-9]].*)
@@ -203,7 +194,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
                 APR_SETIFNULL(ac_cv_func_kqueue, [no]) 
                 APR_SETIFNULL(ac_cv_func_poll, [no]) # See issue 34332
             ;;
-            *-apple-darwin10.*)
+            *-apple-darwin1?.*)
                 APR_ADDTO(CPPFLAGS, [-DDARWIN_10])
             ;;
         esac
@@ -438,10 +429,8 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         APR_SETIFNULL(apr_gethostbyaddr_is_thread_safe, [yes])
         APR_SETIFNULL(apr_getservbyname_is_thread_safe, [yes])
         ;;
-    *cygwin*)
-	APR_ADDTO(CPPFLAGS, [-DCYGWIN])
-	;;
     *mingw*)
+        APR_ADDTO(INTERNAL_CPPFLAGS, -DBINPATH=$apr_builddir/test/.libs)
         APR_ADDTO(CPPFLAGS, [-DWIN32 -D__MSVCRT__])
         APR_ADDTO(LDFLAGS, [-Wl,--enable-auto-import,--subsystem,console])
         APR_SETIFNULL(have_unicode_fs, [1])

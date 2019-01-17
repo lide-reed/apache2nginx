@@ -1,0 +1,16 @@
+#! /bin/sh
+#
+# Created by configure
+
+"/home/default/apache2nginx/srclib/apr/configure" \
+"--disable-option-checking" \
+"--cache-file=/dev/null" \
+"--srcdir=/home/default/apache2nginx/srclib/apr" \
+"--prefix=/usr/local/apache2nginx" \
+"--exec-prefix=/usr/local/apache2nginx" \
+"--libdir=/usr/local/apache2nginx/lib" \
+"--includedir=/usr/local/apache2nginx/include" \
+"--bindir=/usr/local/apache2nginx/bin" \
+"--datadir=/usr/local/apache2nginx" \
+"--with-installbuilddir=/usr/local/apache2nginx/build" \
+"$@"

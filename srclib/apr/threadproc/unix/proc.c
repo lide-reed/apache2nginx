@@ -219,15 +219,14 @@ APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr,
 APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
 {
     int pid;
+    
+    memset(proc, 0, sizeof(apr_proc_t));
 
     if ((pid = fork()) < 0) {
         return errno;
     }
     else if (pid == 0) {
-        proc->pid = pid;
-        proc->in = NULL;
-        proc->out = NULL;
-        proc->err = NULL;
+        proc->pid = getpid();
 
         apr_random_after_fork(proc);
 
@@ -235,9 +234,6 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
     }
 
     proc->pid = pid;
-    proc->in = NULL;
-    proc->out = NULL;
-    proc->err = NULL;
 
     return APR_INPARENT;
 }
@@ -396,7 +392,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         return errno;
     }
     else if (new->pid == 0) {
-        int status;
         /* child process */
 
         /*
@@ -432,7 +427,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         if ((attr->child_in) && (attr->child_in->filedes == -1)) {
             close(STDIN_FILENO);
         }
-        else if (attr->child_in) {
+        else if (attr->child_in &&
+                 attr->child_in->filedes != STDIN_FILENO) {
             dup2(attr->child_in->filedes, STDIN_FILENO);
             apr_file_close(attr->child_in);
         }
@@ -440,7 +436,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         if ((attr->child_out) && (attr->child_out->filedes == -1)) {
             close(STDOUT_FILENO);
         }
-        else if (attr->child_out) {
+        else if (attr->child_out &&
+                 attr->child_out->filedes != STDOUT_FILENO) {
             dup2(attr->child_out->filedes, STDOUT_FILENO);
             apr_file_close(attr->child_out);
         }
@@ -448,7 +445,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         if ((attr->child_err) && (attr->child_err->filedes == -1)) {
             close(STDERR_FILENO);
         }
-        else if (attr->child_err) {
+        else if (attr->child_err &&
+                 attr->child_err->filedes != STDERR_FILENO) {
             dup2(attr->child_err->filedes, STDERR_FILENO);
             apr_file_close(attr->child_err);
         }
@@ -463,10 +461,22 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 _exit(-1);   /* We have big problems, the child should exit. */
             }
         }
+        if (!geteuid()) {
+            apr_procattr_pscb_t *c = attr->perms_set_callbacks;
 
+            while (c) {
+                apr_status_t r;
+                r = (*c->perms_set_fn)((void *)c->data, c->perms,
+                                       attr->uid, attr->gid);
+                if (r != APR_SUCCESS && r != APR_ENOTIMPL) {
+                    _exit(-1);
+                }
+                c = c->next;
+            }
+        }
         /* Only try to switch if we are running as root */
         if (attr->gid != -1 && !geteuid()) {
-            if ((status = setgid(attr->gid))) {
+            if (setgid(attr->gid)) {
                 if (attr->errfn) {
                     attr->errfn(pool, errno, "setting of group failed");
                 }
@@ -475,7 +485,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
 
         if (attr->uid != -1 && !geteuid()) {
-            if ((status = setuid(attr->uid))) {
+            if (setuid(attr->uid)) {
                 if (attr->errfn) {
                     attr->errfn(pool, errno, "setting of user failed");
                 }
@@ -483,7 +493,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             }
         }
 
-        if ((status = limit_proc(attr)) != APR_SUCCESS) {
+        if (limit_proc(attr) != APR_SUCCESS) {
             if (attr->errfn) {
                 attr->errfn(pool, errno, "setting of resource limits failed");
             }
@@ -711,3 +721,19 @@ APR_DECLARE(apr_status_t) apr_procattr_limit_set(apr_procattr_t *attr,
 }
 #endif /* APR_HAVE_STRUCT_RLIMIT */
 
+APR_DECLARE(apr_status_t) apr_procattr_perms_set_register(apr_procattr_t *attr,
+                                                 apr_perms_setfn_t *perms_set_fn,
+                                                 void *data,
+                                                 apr_fileperms_t perms)
+{
+    apr_procattr_pscb_t *c;
+
+    c = apr_palloc(attr->pool, sizeof(apr_procattr_pscb_t));
+    c->data = data;
+    c->perms = perms;
+    c->perms_set_fn = perms_set_fn;
+    c->next = attr->perms_set_callbacks;
+    attr->perms_set_callbacks = c;
+
+    return APR_SUCCESS;
+}

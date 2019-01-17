@@ -56,9 +56,9 @@ typedef struct {
 
 /* The extensions used for the database files */
 /** SDBM Directory file extension */
-#define APR_SDBM_DIRFEXT    ".dir"
+#define APR_SDBM_DIRFEXT	".dir"
 /** SDBM page file extension */
-#define APR_SDBM_PAGFEXT    ".pag"
+#define APR_SDBM_PAGFEXT	".pag"
 
 /* flags to sdbm_store */
 #define APR_SDBM_INSERT     0   /**< Insert */

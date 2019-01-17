@@ -82,7 +82,7 @@ APU_DECLARE(apr_opt_fn_t *) apr_dynamic_fn_retrieve(const char *szName);
  * @param name The name of the function
  */
 #define APR_RETRIEVE_OPTIONAL_FN(name) \
-    (APR_OPTIONAL_FN_TYPE(name) *)apr_dynamic_fn_retrieve(#name)
+	(APR_OPTIONAL_FN_TYPE(name) *)apr_dynamic_fn_retrieve(#name)
 
 /** @} */
 #ifdef __cplusplus

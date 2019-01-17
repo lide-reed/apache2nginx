@@ -26,7 +26,7 @@
 #endif
 #include <winbase.h>
 #include <string.h>
-#if APR_HAVE_SYS_STAT_H
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
 #include "apr_arch_misc.h"
@@ -55,7 +55,7 @@ apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen,
     apr_status_t rv;
 
     /* This is correct, we don't twist the filename if it is will
-     * definately be shorter than 248 characters.  It merits some 
+     * definitely be shorter than 248 characters.  It merits some 
      * performance testing to see if this has any effect, but there
      * seem to be applications that get confused by the resulting
      * Unicode \\?\ style file names, especially if they use argv[0]
@@ -145,7 +145,6 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
         apr_wchar_t *wpre, *wfile, *ch;
         apr_size_t n = strlen(file) + 1;
         apr_size_t r, d;
-        apr_status_t rv;
 
         if (apr_os_level >= APR_WIN_2000) {
             if (global)
@@ -169,7 +168,7 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
         wfile = apr_palloc(pool, (r + n) * sizeof(apr_wchar_t));
         wcscpy(wfile, wpre);
         d = n;
-        if ((rv = apr_conv_utf8_to_ucs2(file, &n, wfile + r, &d))) {
+        if (apr_conv_utf8_to_ucs2(file, &n, wfile + r, &d)) {
             return NULL;
         }
         for (ch = wfile + r; *ch; ++ch) {
@@ -186,7 +185,6 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
         apr_size_t n = strlen(file) + 1;
 
 #if !APR_HAS_UNICODE_FS
-        apr_status_t rv;
         apr_size_t r, d;
         char *pre;
 
@@ -331,6 +329,9 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE;
     apr_status_t rv;
 
+    if (flag & APR_FOPEN_NONBLOCK) {
+        return APR_ENOTIMPL;
+    }
     if (flag & APR_FOPEN_READ) {
         oflags |= GENERIC_READ;
     }
@@ -477,10 +478,11 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
         /* This feature is not supported on this platform. */
         (*new)->flags &= ~APR_FOPEN_SPARSE;
 
+#if APR_FILES_AS_SOCKETS
     /* Create a pollset with room for one descriptor. */
     /* ### check return codes */
     (void) apr_pollset_create(&(*new)->pollset, 1, pool, 0);
-
+#endif
     if (!(flag & APR_FOPEN_NOCLEANUP)) {
         apr_pool_cleanup_register((*new)->pool, (void *)(*new), file_cleanup,
                                   apr_pool_cleanup_null);
@@ -649,17 +651,15 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
         rv = apr_thread_mutex_create(&(*file)->mutex, 
                                      APR_THREAD_MUTEX_DEFAULT, pool);
         if (rv) {
-            if (file_cleanup(*file) == APR_SUCCESS) {
-                apr_pool_cleanup_kill(pool, *file, file_cleanup);
-            }
             return rv;
         }
     }
 
+#if APR_FILES_AS_SOCKETS
     /* Create a pollset with room for one descriptor. */
     /* ### check return codes */
     (void) apr_pollset_create(&(*file)->pollset, 1, pool, 0);
-
+#endif
     /* Should we be testing if thefile is a handle to 
      * a PIPE and set up the mechanics appropriately?
      *

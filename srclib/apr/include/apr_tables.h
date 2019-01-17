@@ -172,14 +172,14 @@ APR_DECLARE(void) apr_array_clear(apr_array_header_t *arr);
  * @param src The source array to add to the destination array
  */
 APR_DECLARE(void) apr_array_cat(apr_array_header_t *dst,
-                    const apr_array_header_t *src);
+			        const apr_array_header_t *src);
 
 /**
  * Copy the entire array.
  * @param p The pool to allocate the copy of the array out of
  * @param arr The array to copy
  * @return An exact copy of the array passed in
- * @remark The alternate apr_array_copy_hdr copies only the header, and arranges 
+ * @remark The alternate apr_array_copy_hdr() copies only the header, and arranges 
  *         for the elements to be copied if (and only if) the code subsequently
  *         does a push or arraycat.
  */
@@ -191,7 +191,7 @@ APR_DECLARE(apr_array_header_t *) apr_array_copy(apr_pool_t *p,
  * @param p The pool to allocate the copy of the array out of
  * @param arr The array to copy
  * @return An exact copy of the array passed in
- * @remark The alternate apr_array_copy copies the *entire* array.
+ * @remark The alternate apr_array_copy() copies the *entire* array.
  */
 APR_DECLARE(apr_array_header_t *) apr_array_copy_hdr(apr_pool_t *p,
                                       const apr_array_header_t *arr);
@@ -219,8 +219,8 @@ APR_DECLARE(apr_array_header_t *) apr_array_append(apr_pool_t *p,
  * @return A string containing all of the data in the array.
  */
 APR_DECLARE(char *) apr_array_pstrcat(apr_pool_t *p,
-                      const apr_array_header_t *arr,
-                      const char sep);
+				      const apr_array_header_t *arr,
+				      const char sep);
 
 /**
  * Make a new table.
@@ -268,6 +268,18 @@ APR_DECLARE(void) apr_table_clear(apr_table_t *t);
 APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key);
 
 /**
+ * Get values associated with a given key from the table.      If more than one
+ * value exists, return a comma separated list of values.  After this call, the
+ * data is still in the table.
+ * @param p The pool to allocate the combined value from, if necessary
+ * @param t The table to search for the key
+ * @param key The key to search for (case does not matter)
+ * @return The value associated with the key, or NULL if the key does not exist.
+ */
+APR_DECLARE(const char *) apr_table_getm(apr_pool_t *p, const apr_table_t *t,
+                                         const char *key);
+
+/**
  * Add a key/value pair to a table.  If another element already exists with the
  * same key, this will overwrite the old data.
  * @param t The table to add the data to.
@@ -306,7 +318,7 @@ APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key);
  * @param t The table to search for the data
  * @param key The key to merge data for (case does not matter)
  * @param val The data to add
- * @remark If the key is not found, then this function acts like apr_table_add
+ * @remark If the key is not found, then this function acts like apr_table_add()
  */
 APR_DECLARE(void) apr_table_merge(apr_table_t *t, const char *key,
                                   const char *val);
@@ -318,7 +330,7 @@ APR_DECLARE(void) apr_table_merge(apr_table_t *t, const char *key,
  * @param t The table to search for the data
  * @param key The key to merge data for (case does not matter)
  * @param val The data to add
- * @remark If the key is not found, then this function acts like apr_table_addn
+ * @remark If the key is not found, then this function acts like apr_table_addn()
  */
 APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
                                    const char *val);
@@ -368,6 +380,7 @@ APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
  * @remark Iteration continues while this callback function returns non-zero.
  * To export the callback function for apr_table_[v]do() it must be declared 
  * in the _NONSTD convention.
+ * @see apr_table_do @see apr_table_vdo
  */
 typedef int (apr_table_do_callback_fn_t)(void *rec, const char *key, 
                                                     const char *value);
@@ -380,7 +393,7 @@ typedef int (apr_table_do_callback_fn_t)(void *rec, const char *key,
  * in the table.  Otherwise, the function is invoked only for those
  * elements matching the keys specified.
  *
- * If an invocation of the @param comp function returns zero,
+ * If an invocation of the comp function returns zero,
  * iteration will continue using the next specified key, if any.
  *
  * @param comp The function to run
@@ -389,7 +402,7 @@ typedef int (apr_table_do_callback_fn_t)(void *rec, const char *key,
  * @param ... A varargs array of zero or more (char *) keys followed by NULL
  * @return FALSE if one of the comp() iterations returned zero; TRUE if all
  *            iterations returned non-zero
- * @see apr_table_do_callback_fn_t
+ * @see apr_table_do_callback_fn_t @see apr_table_vdo
  */
 APR_DECLARE_NONSTD(int) apr_table_do(apr_table_do_callback_fn_t *comp,
                                      void *rec, const apr_table_t *t, ...)
@@ -400,13 +413,13 @@ APR_DECLARE_NONSTD(int) apr_table_do(apr_table_do_callback_fn_t *comp,
 
 /** 
  * Iterate over a table running the provided function once for every
- * element in the table.  The @param vp varargs parameter must be a
+ * element in the table.  The vp varargs parameter must be a
  * list of zero or more (char *) keys followed by a NULL pointer.  If
  * zero keys are given, the @param comp function will be invoked for
  * every element in the table.  Otherwise, the function is invoked
  * only for those elements matching the keys specified.
  *
- * If an invocation of the @param comp function returns zero,
+ * If an invocation of the comp function returns zero,
  * iteration will continue using the next specified key, if any.
  *
  * @param comp The function to run
@@ -415,7 +428,7 @@ APR_DECLARE_NONSTD(int) apr_table_do(apr_table_do_callback_fn_t *comp,
  * @param vp List of zero or more (char *) keys followed by NULL
  * @return FALSE if one of the comp() iterations returned zero; TRUE if all
  *            iterations returned non-zero
- * @see apr_table_do_callback_fn_t
+ * @see apr_table_do_callback_fn_t @see apr_table_do
  */
 APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
                                void *rec, const apr_table_t *t, va_list vp);
@@ -424,6 +437,8 @@ APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
 #define APR_OVERLAP_TABLES_SET   (0)
 /** flag for overlap to use apr_table_mergen */
 #define APR_OVERLAP_TABLES_MERGE (1)
+/** flag for overlap to use apr_table_addn */
+#define APR_OVERLAP_TABLES_ADD   (2)
 /**
  * For each element in table b, either use setn or mergen to add the data
  * to table a.  Which method is used is determined by the flags passed in.
@@ -432,6 +447,7 @@ APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
  * @param flags How to add the table to table a.  One of:
  *          APR_OVERLAP_TABLES_SET        Use apr_table_setn
  *          APR_OVERLAP_TABLES_MERGE      Use apr_table_mergen
+ *          APR_OVERLAP_TABLES_ADD        Use apr_table_addn
  * @remark  When merging duplicates, the two values are concatenated,
  *          separated by the string ", ".
  * @remark  This function is highly optimized, and uses less memory and CPU cycles
@@ -448,6 +464,9 @@ APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
  *  for (i = 0; i < barr->nelts; ++i) {
  *      if (flags & APR_OVERLAP_TABLES_MERGE) {
  *          apr_table_mergen(a, belt[i].key, belt[i].val);
+ *      }
+ *      else if (flags & APR_OVERLAP_TABLES_ADD) {
+ *          apr_table_addn(a, belt[i].key, belt[i].val);
  *      }
  *      else {
  *          apr_table_setn(a, belt[i].key, belt[i].val);
@@ -472,7 +491,8 @@ APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
  *
  * @param t Table.
  * @param flags APR_OVERLAP_TABLES_MERGE to merge, or
- *              APR_OVERLAP_TABLES_SET to overwrite
+ *              APR_OVERLAP_TABLES_SET to overwrite, or
+ *              APR_OVERLAP_TABLES_ADD to add
  * @remark When merging duplicates, the two values are concatenated,
  *         separated by the string ", ".
  */
@@ -484,4 +504,4 @@ APR_DECLARE(void) apr_table_compress(apr_table_t *t, unsigned flags);
 }
 #endif
 
-#endif    /* ! APR_TABLES_H */
+#endif	/* ! APR_TABLES_H */

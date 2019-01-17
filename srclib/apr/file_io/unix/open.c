@@ -135,6 +135,14 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     }
 #endif
 
+    if (flag & APR_FOPEN_NONBLOCK) {
+#ifdef O_NONBLOCK
+        oflags |= O_NONBLOCK;
+#else
+        return APR_ENOTIMPL;
+#endif
+    }
+
 #ifdef O_CLOEXEC
     /* Introduced in Linux 2.6.23. Silently ignored on earlier Linux kernels.
      */
@@ -171,15 +179,29 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
        return errno;
     }
     if (!(flag & APR_FOPEN_NOCLEANUP)) {
-        int flags;
+#ifdef O_CLOEXEC
+        static int has_o_cloexec = 0;
+        if (!has_o_cloexec)
+#endif
+        {
+            int flags;
 
-        if ((flags = fcntl(fd, F_GETFD)) == -1)
-            return errno;
-
-        if ((flags & FD_CLOEXEC) == 0) {
-            flags |= FD_CLOEXEC;
-            if (fcntl(fd, F_SETFD, flags) == -1)
+            if ((flags = fcntl(fd, F_GETFD)) == -1) {
+                close(fd);
                 return errno;
+            }
+            if ((flags & FD_CLOEXEC) == 0) {
+                flags |= FD_CLOEXEC;
+                if (fcntl(fd, F_SETFD, flags) == -1) {
+                    close(fd);
+                    return errno;
+                }
+            }
+#ifdef O_CLOEXEC
+            else {
+                has_o_cloexec = 1;
+            }
+#endif
         }
     }
 

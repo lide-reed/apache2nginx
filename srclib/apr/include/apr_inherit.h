@@ -28,7 +28,7 @@
  * Prototype for type-specific declarations of apr_foo_inherit_set 
  * functions.  
  * @remark Doxygen unwraps this macro (via doxygen.conf) to provide 
- * actual help for each specific occurance of apr_foo_inherit_set.
+ * actual help for each specific occurrence of apr_foo_inherit_set.
  * @remark the linkage is specified for APR. It would be possible to expand
  *       the macros to support other linkages.
  */
@@ -40,7 +40,7 @@
  * Prototype for type-specific declarations of apr_foo_inherit_unset 
  * functions.  
  * @remark Doxygen unwraps this macro (via doxygen.conf) to provide 
- * actual help for each specific occurance of apr_foo_inherit_unset.
+ * actual help for each specific occurrence of apr_foo_inherit_unset.
  * @remark the linkage is specified for APR. It would be possible to expand
  *       the macros to support other linkages.
  */
@@ -48,4 +48,4 @@
     APR_DECLARE(apr_status_t) apr_##type##_inherit_unset( \
                                           apr_##type##_t *the##type)
 
-#endif    /* ! APR_INHERIT_H */
+#endif	/* ! APR_INHERIT_H */

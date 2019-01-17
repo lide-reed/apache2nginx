@@ -76,11 +76,11 @@
  * Mode flags for the dlopen routine.
  */
 #undef  RTLD_LAZY
-#define RTLD_LAZY    1    /* lazy function call binding */
+#define RTLD_LAZY	1	/* lazy function call binding */
 #undef  RTLD_NOW
-#define RTLD_NOW    2    /* immediate function call binding */
+#define RTLD_NOW	2	/* immediate function call binding */
 #undef  RTLD_GLOBAL
-#define RTLD_GLOBAL    0x100    /* allow symbols to be global */
+#define RTLD_GLOBAL	0x100	/* allow symbols to be global */
 
 /*
  * To be able to initialize, a library may provide a dl_info structure
@@ -185,8 +185,8 @@ APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr
  */
 
 typedef struct {
-    char *name;            /* the symbols's name */
-    void *addr;            /* its relocated virtual address */
+    char *name;			/* the symbols's name */
+    void *addr;			/* its relocated virtual address */
 } Export, *ExportPtr;
 
 /*
@@ -194,8 +194,8 @@ typedef struct {
  * destructors. This is gleaned from the output of munch.
  */
 typedef struct {
-    void (*init) (void);    /* call static constructors */
-    void (*term) (void);    /* call static destructors */
+    void (*init) (void);	/* call static constructors */
+    void (*term) (void);	/* call static destructors */
 } Cdtor, *CdtorPtr;
 
 typedef void (*GccCDtorPtr) (void);
@@ -205,15 +205,15 @@ typedef void (*GccCDtorPtr) (void);
  */
 typedef struct Module {
     struct Module *next;
-    char *name;            /* module name for refcounting */
-    int refCnt;            /* the number of references */
-    void *entry;        /* entry point from load */
-    struct dl_info *info;    /* optional init/terminate functions */
-    CdtorPtr cdtors;        /* optional C++ constructors */
-    GccCDtorPtr gcc_ctor;    /* g++ constructors  --jwe */
-    GccCDtorPtr gcc_dtor;    /* g++ destructors  --jwe */
-    int nExports;        /* the number of exports found */
-    ExportPtr exports;        /* the array of exports */
+    char *name;			/* module name for refcounting */
+    int refCnt;			/* the number of references */
+    void *entry;		/* entry point from load */
+    struct dl_info *info;	/* optional init/terminate functions */
+    CdtorPtr cdtors;		/* optional C++ constructors */
+    GccCDtorPtr gcc_ctor;	/* g++ constructors  --jwe */
+    GccCDtorPtr gcc_dtor;	/* g++ destructors  --jwe */
+    int nExports;		/* the number of exports found */
+    ExportPtr exports;		/* the array of exports */
 } Module, *ModulePtr;
 
 /*
@@ -250,123 +250,123 @@ void *dlopen(const char *path, int mode)
      * for use with loadbind.
      */
     if (!mainModule) {
-    if ((mainModule = findMain()) == NULL)
-        return NULL;
-    atexit(terminate);
+	if ((mainModule = findMain()) == NULL)
+	    return NULL;
+	atexit(terminate);
     }
     /*
      * Scan the list of modules if we have the module already loaded.
      */
     for (mp = modList; mp; mp = mp->next)
-    if (strcmp(mp->name, path) == 0) {
-        mp->refCnt++;
-        return mp;
-    }
+	if (strcmp(mp->name, path) == 0) {
+	    mp->refCnt++;
+	    return mp;
+	}
     if ((mp = (ModulePtr) calloc(1, sizeof(*mp))) == NULL) {
-    errvalid++;
-    strcpy(errbuf, "calloc: ");
-    strcat(errbuf, strerror(errno));
-    return NULL;
+	errvalid++;
+	strcpy(errbuf, "calloc: ");
+	strcat(errbuf, strerror(errno));
+	return NULL;
     }
     if ((mp->name = strdup(path)) == NULL) {
-    errvalid++;
-    strcpy(errbuf, "strdup: ");
-    strcat(errbuf, strerror(errno));
-    free(mp);
-    return NULL;
+	errvalid++;
+	strcpy(errbuf, "strdup: ");
+	strcat(errbuf, strerror(errno));
+	free(mp);
+	return NULL;
     }
     /*
      * load should be declared load(const char *...). Thus we
      * cast the path to a normal char *. Ugly.
      */
     if ((mp->entry = (void *) loadAndInit((char *) path, L_NOAUTODEFER, NULL)) == NULL) {
-    free(mp->name);
-    free(mp);
-    errvalid++;
-    strcpy(errbuf, "dlopen: ");
-    strcat(errbuf, path);
-    strcat(errbuf, ": ");
-    /*
-     * If AIX says the file is not executable, the error
-     * can be further described by querying the loader about
-     * the last error.
-     */
-    if (errno == ENOEXEC) {
-        char *tmp[BUFSIZ / sizeof(char *)];
-        if (loadquery(L_GETMESSAGES, tmp, sizeof(tmp)) == -1)
-        strcpy(errbuf, strerror(errno));
-        else {
-        char **p;
-        for (p = tmp; *p; p++)
-            caterr(*p);
-        }
-    }
-    else
-        strcat(errbuf, strerror(errno));
-    return NULL;
+	free(mp->name);
+	free(mp);
+	errvalid++;
+	strcpy(errbuf, "dlopen: ");
+	strcat(errbuf, path);
+	strcat(errbuf, ": ");
+	/*
+	 * If AIX says the file is not executable, the error
+	 * can be further described by querying the loader about
+	 * the last error.
+	 */
+	if (errno == ENOEXEC) {
+	    char *tmp[BUFSIZ / sizeof(char *)];
+	    if (loadquery(L_GETMESSAGES, tmp, sizeof(tmp)) == -1)
+		strcpy(errbuf, strerror(errno));
+	    else {
+		char **p;
+		for (p = tmp; *p; p++)
+		    caterr(*p);
+	    }
+	}
+	else
+	    strcat(errbuf, strerror(errno));
+	return NULL;
     }
     mp->refCnt = 1;
     mp->next = modList;
     modList = mp;
     if (loadbind(0, mainModule, mp->entry) == -1) {
-    dlclose(mp);
-    errvalid++;
-    strcpy(errbuf, "loadbind: ");
-    strcat(errbuf, strerror(errno));
-    return NULL;
+	dlclose(mp);
+	errvalid++;
+	strcpy(errbuf, "loadbind: ");
+	strcat(errbuf, strerror(errno));
+	return NULL;
     }
     /*
      * If the user wants global binding, loadbind against all other
      * loaded modules.
      */
     if (mode & RTLD_GLOBAL) {
-    register ModulePtr mp1;
-    for (mp1 = mp->next; mp1; mp1 = mp1->next)
-        if (loadbind(0, mp1->entry, mp->entry) == -1) {
-        dlclose(mp);
-        errvalid++;
-        strcpy(errbuf, "loadbind: ");
-        strcat(errbuf, strerror(errno));
-        return NULL;
-        }
+	register ModulePtr mp1;
+	for (mp1 = mp->next; mp1; mp1 = mp1->next)
+	    if (loadbind(0, mp1->entry, mp->entry) == -1) {
+		dlclose(mp);
+		errvalid++;
+		strcpy(errbuf, "loadbind: ");
+		strcat(errbuf, strerror(errno));
+		return NULL;
+	    }
     }
     if (readExports(mp) == -1) {
-    dlclose(mp);
-    return NULL;
+	dlclose(mp);
+	return NULL;
     }
     /*
      * If there is a dl_info structure, call the init function.
      */
     if (mp->info = (struct dl_info *) dlsym(mp, "dl_info")) {
-    if (mp->info->init)
-        (*mp->info->init) ();
+	if (mp->info->init)
+	    (*mp->info->init) ();
     }
     else
-    errvalid = 0;
+	errvalid = 0;
     /*
      * If the shared object was compiled using xlC we will need
      * to call static constructors (and later on dlclose destructors).
      */
     if (mp->cdtors = (CdtorPtr) dlsym(mp, "__cdtors")) {
-    CdtorPtr cp = mp->cdtors;
-    while (cp->init || cp->term) {
-        if (cp->init && cp->init != (void (*)(void)) 0xffffffff)
-        (*cp->init) ();
-        cp++;
-    }
-    /*
-     * If the shared object was compiled using g++, we will need
-     * to call global constructors using the _GLOBAL__DI function,
-     * and later, global destructors using the _GLOBAL_DD
-     * funciton.  --jwe
-     */
+	CdtorPtr cp = mp->cdtors;
+	while (cp->init || cp->term) {
+	    if (cp->init && cp->init != (void (*)(void)) 0xffffffff)
+		(*cp->init) ();
+	    cp++;
+	}
+	/*
+	 * If the shared object was compiled using g++, we will need
+	 * to call global constructors using the _GLOBAL__DI function,
+	 * and later, global destructors using the _GLOBAL_DD
+	 * funciton.  --jwe
+	 */
     }
     else if (mp->gcc_ctor = (GccCDtorPtr) dlsym(mp, "_GLOBAL__DI")) {
-    (*mp->gcc_ctor) ();
-    mp->gcc_dtor = (GccCDtorPtr) dlsym(mp, "_GLOBAL__DD");
+	(*mp->gcc_ctor) ();
+	mp->gcc_dtor = (GccCDtorPtr) dlsym(mp, "_GLOBAL__DD");
     }
     else
-    errvalid = 0;
+	errvalid = 0;
     return mp;
 }
 
@@ -379,33 +379,33 @@ static void caterr(char *s)
     register char *p = s;
 
     while (*p >= '0' && *p <= '9')
-    p++;
+	p++;
     switch (atoi(s)) {
     case L_ERROR_TOOMANY:
-    strcat(errbuf, "to many errors");
-    break;
+	strcat(errbuf, "to many errors");
+	break;
     case L_ERROR_NOLIB:
-    strcat(errbuf, "can't load library");
-    strcat(errbuf, p);
-    break;
+	strcat(errbuf, "can't load library");
+	strcat(errbuf, p);
+	break;
     case L_ERROR_UNDEF:
-    strcat(errbuf, "can't find symbol");
-    strcat(errbuf, p);
-    break;
+	strcat(errbuf, "can't find symbol");
+	strcat(errbuf, p);
+	break;
     case L_ERROR_RLDBAD:
-    strcat(errbuf, "bad RLD");
-    strcat(errbuf, p);
-    break;
+	strcat(errbuf, "bad RLD");
+	strcat(errbuf, p);
+	break;
     case L_ERROR_FORMAT:
-    strcat(errbuf, "bad exec format in");
-    strcat(errbuf, p);
-    break;
+	strcat(errbuf, "bad exec format in");
+	strcat(errbuf, p);
+	break;
     case L_ERROR_ERRNO:
-    strcat(errbuf, strerror(atoi(++p)));
-    break;
+	strcat(errbuf, strerror(atoi(++p)));
+	break;
     default:
-    strcat(errbuf, s);
-    break;
+	strcat(errbuf, s);
+	break;
     }
 }
 
@@ -420,8 +420,8 @@ void *dlsym(void *handle, const char *symbol)
      * the result to function pointers anyways.
      */
     for (ep = mp->exports, i = mp->nExports; i; i--, ep++)
-    if (strcmp(ep->name, symbol) == 0)
-        return ep->addr;
+	if (strcmp(ep->name, symbol) == 0)
+	    return ep->addr;
     errvalid++;
     strcpy(errbuf, "dlsym: undefined symbol ");
     strcat(errbuf, symbol);
@@ -431,8 +431,8 @@ void *dlsym(void *handle, const char *symbol)
 const char *dlerror(void)
 {
     if (errvalid) {
-    errvalid = 0;
-    return errbuf;
+	errvalid = 0;
+	return errbuf;
     }
     return NULL;
 }
@@ -444,45 +444,45 @@ int dlclose(void *handle)
     register ModulePtr mp1;
 
     if (--mp->refCnt > 0)
-    return 0;
+	return 0;
     if (mp->info && mp->info->fini)
-    (*mp->info->fini) ();
+	(*mp->info->fini) ();
     if (mp->cdtors) {
-    CdtorPtr cp = mp->cdtors;
-    while (cp->init || cp->term) {
-        if (cp->term && cp->init != (void (*)(void)) 0xffffffff)
-        (*cp->term) ();
-        cp++;
-    }
-    /*
-     * If the function to handle global destructors for g++
-     * exists, call it.  --jwe
-     */
+	CdtorPtr cp = mp->cdtors;
+	while (cp->init || cp->term) {
+	    if (cp->term && cp->init != (void (*)(void)) 0xffffffff)
+		(*cp->term) ();
+	    cp++;
+	}
+	/*
+	 * If the function to handle global destructors for g++
+	 * exists, call it.  --jwe
+	 */
     }
     else if (mp->gcc_dtor) {
-    (*mp->gcc_dtor) ();
+	(*mp->gcc_dtor) ();
     }
     result = unload(mp->entry);
     if (result == -1) {
-    errvalid++;
-    strcpy(errbuf, strerror(errno));
+	errvalid++;
+	strcpy(errbuf, strerror(errno));
     }
     if (mp->exports) {
-    register ExportPtr ep;
-    register int i;
-    for (ep = mp->exports, i = mp->nExports; i; i--, ep++)
-        if (ep->name)
-        free(ep->name);
-    free(mp->exports);
+	register ExportPtr ep;
+	register int i;
+	for (ep = mp->exports, i = mp->nExports; i; i--, ep++)
+	    if (ep->name)
+		free(ep->name);
+	free(mp->exports);
     }
     if (mp == modList)
-    modList = mp->next;
+	modList = mp->next;
     else {
-    for (mp1 = modList; mp1; mp1 = mp1->next)
-        if (mp1->next == mp) {
-        mp1->next = mp->next;
-        break;
-        }
+	for (mp1 = modList; mp1; mp1 = mp1->next)
+	    if (mp1->next == mp) {
+		mp1->next = mp->next;
+		break;
+	    }
     }
     free(mp->name);
     free(mp);
@@ -492,7 +492,7 @@ int dlclose(void *handle)
 static void terminate(void)
 {
     while (modList)
-    dlclose(modList);
+	dlclose(modList);
 }
 
 /*
@@ -518,27 +518,27 @@ static int readExports(ModulePtr mp)
      * module using L_GETINFO.
      */
     if ((buf = malloc(size)) == NULL) {
-    errvalid++;
-    strcpy(errbuf, "readExports: ");
-    strcat(errbuf, strerror(errno));
-    return -1;
+	errvalid++;
+	strcpy(errbuf, "readExports: ");
+	strcat(errbuf, strerror(errno));
+	return -1;
     }
     while ((i = loadquery(L_GETINFO, buf, size)) == -1 && errno == ENOMEM) {
-    free(buf);
-    size += 4 * 1024;
-    if ((buf = malloc(size)) == NULL) {
-        errvalid++;
-        strcpy(errbuf, "readExports: ");
-        strcat(errbuf, strerror(errno));
-        return -1;
-    }
+	free(buf);
+	size += 4 * 1024;
+	if ((buf = malloc(size)) == NULL) {
+	    errvalid++;
+	    strcpy(errbuf, "readExports: ");
+	    strcat(errbuf, strerror(errno));
+	    return -1;
+	}
     }
     if (i == -1) {
-    errvalid++;
-    strcpy(errbuf, "readExports: ");
-    strcat(errbuf, strerror(errno));
-    free(buf);
-    return -1;
+	errvalid++;
+	strcpy(errbuf, "readExports: ");
+	strcat(errbuf, strerror(errno));
+	free(buf);
+	return -1;
     }
     /*
      * Traverse the list of loaded modules. The entry point
@@ -547,30 +547,30 @@ static int readExports(ModulePtr mp)
      */
     lp = (struct ld_info *) buf;
     while (lp) {
-    if ((unsigned long) mp->entry >= (unsigned long) lp->ldinfo_dataorg &&
-        (unsigned long) mp->entry < (unsigned long) lp->ldinfo_dataorg +
-        lp->ldinfo_datasize) {
-        dataorg = lp->ldinfo_dataorg;
-        ldp = ldopen(lp->ldinfo_filename, ldp);
-        break;
-    }
-    if (lp->ldinfo_next == 0)
-        lp = NULL;
-    else
-        lp = (struct ld_info *) ((char *) lp + lp->ldinfo_next);
+	if ((unsigned long) mp->entry >= (unsigned long) lp->ldinfo_dataorg &&
+	    (unsigned long) mp->entry < (unsigned long) lp->ldinfo_dataorg +
+	    lp->ldinfo_datasize) {
+	    dataorg = lp->ldinfo_dataorg;
+	    ldp = ldopen(lp->ldinfo_filename, ldp);
+	    break;
+	}
+	if (lp->ldinfo_next == 0)
+	    lp = NULL;
+	else
+	    lp = (struct ld_info *) ((char *) lp + lp->ldinfo_next);
     }
     free(buf);
     if (!ldp) {
-    errvalid++;
-    strcpy(errbuf, "readExports: ");
-    strcat(errbuf, strerror(errno));
-    return -1;
+	errvalid++;
+	strcpy(errbuf, "readExports: ");
+	strcat(errbuf, strerror(errno));
+	return -1;
     }
     if (TYPE(ldp) != U802TOCMAGIC) {
-    errvalid++;
-    strcpy(errbuf, "readExports: bad magic");
-    while (ldclose(ldp) == FAILURE);
-    return -1;
+	errvalid++;
+	strcpy(errbuf, "readExports: bad magic");
+	while (ldclose(ldp) == FAILURE);
+	return -1;
     }
     /*
      * Get the padding for the data section. This is needed for
@@ -578,41 +578,41 @@ static int readExports(ModulePtr mp)
      * function pointer to the exported symbol.
      */
     if (ldnshread(ldp, _DATA, &shdata) != SUCCESS) {
-    errvalid++;
-    strcpy(errbuf, "readExports: cannot read data section header");
-    while (ldclose(ldp) == FAILURE);
-    return -1;
+	errvalid++;
+	strcpy(errbuf, "readExports: cannot read data section header");
+	while (ldclose(ldp) == FAILURE);
+	return -1;
     }
     if (ldnshread(ldp, _LOADER, &sh) != SUCCESS) {
-    errvalid++;
-    strcpy(errbuf, "readExports: cannot read loader section header");
-    while (ldclose(ldp) == FAILURE);
-    return -1;
+	errvalid++;
+	strcpy(errbuf, "readExports: cannot read loader section header");
+	while (ldclose(ldp) == FAILURE);
+	return -1;
     }
     /*
      * We read the complete loader section in one chunk, this makes
      * finding long symbol names residing in the string table easier.
      */
     if ((ldbuf = (char *) malloc(sh.s_size)) == NULL) {
-    errvalid++;
-    strcpy(errbuf, "readExports: ");
-    strcat(errbuf, strerror(errno));
-    while (ldclose(ldp) == FAILURE);
-    return -1;
+	errvalid++;
+	strcpy(errbuf, "readExports: ");
+	strcat(errbuf, strerror(errno));
+	while (ldclose(ldp) == FAILURE);
+	return -1;
     }
     if (FSEEK(ldp, sh.s_scnptr, BEGINNING) != OKFSEEK) {
-    errvalid++;
-    strcpy(errbuf, "readExports: cannot seek to loader section");
-    free(ldbuf);
-    while (ldclose(ldp) == FAILURE);
-    return -1;
+	errvalid++;
+	strcpy(errbuf, "readExports: cannot seek to loader section");
+	free(ldbuf);
+	while (ldclose(ldp) == FAILURE);
+	return -1;
     }
     if (FREAD(ldbuf, sh.s_size, 1, ldp) != 1) {
-    errvalid++;
-    strcpy(errbuf, "readExports: cannot read loader section");
-    free(ldbuf);
-    while (ldclose(ldp) == FAILURE);
-    return -1;
+	errvalid++;
+	strcpy(errbuf, "readExports: cannot read loader section");
+	free(ldbuf);
+	while (ldclose(ldp) == FAILURE);
+	return -1;
     }
     lhp = (LDHDR *) ldbuf;
     ls = (LDSYM *) (ldbuf + LDHDRSZ);
@@ -620,17 +620,17 @@ static int readExports(ModulePtr mp)
      * Count the number of exports to include in our export table.
      */
     for (i = lhp->l_nsyms; i; i--, ls++) {
-    if (!LDR_EXPORT(*ls))
-        continue;
-    mp->nExports++;
+	if (!LDR_EXPORT(*ls))
+	    continue;
+	mp->nExports++;
     }
     if ((mp->exports = (ExportPtr) calloc(mp->nExports, sizeof(*mp->exports))) == NULL) {
-    errvalid++;
-    strcpy(errbuf, "readExports: ");
-    strcat(errbuf, strerror(errno));
-    free(ldbuf);
-    while (ldclose(ldp) == FAILURE);
-    return -1;
+	errvalid++;
+	strcpy(errbuf, "readExports: ");
+	strcat(errbuf, strerror(errno));
+	free(ldbuf);
+	while (ldclose(ldp) == FAILURE);
+	return -1;
     }
     /*
      * Fill in the export table. All entries are relative to
@@ -639,26 +639,26 @@ static int readExports(ModulePtr mp)
     ep = mp->exports;
     ls = (LDSYM *) (ldbuf + LDHDRSZ);
     for (i = lhp->l_nsyms; i; i--, ls++) {
-    char *symname;
-    char tmpsym[SYMNMLEN + 1];
-    if (!LDR_EXPORT(*ls))
-        continue;
-    if (ls->l_zeroes == 0)
-        symname = ls->l_offset + lhp->l_stoff + ldbuf;
-    else {
-        /*
-         * The l_name member is not zero terminated, we
-         * must copy the first SYMNMLEN chars and make
-         * sure we have a zero byte at the end.
-         */
-        strncpy(tmpsym, ls->l_name, SYMNMLEN);
-        tmpsym[SYMNMLEN] = '\0';
-        symname = tmpsym;
-    }
-    ep->name = strdup(symname);
-    ep->addr = (void *) ((unsigned long) dataorg +
-                 ls->l_value - shdata.s_vaddr);
-    ep++;
+	char *symname;
+	char tmpsym[SYMNMLEN + 1];
+	if (!LDR_EXPORT(*ls))
+	    continue;
+	if (ls->l_zeroes == 0)
+	    symname = ls->l_offset + lhp->l_stoff + ldbuf;
+	else {
+	    /*
+	     * The l_name member is not zero terminated, we
+	     * must copy the first SYMNMLEN chars and make
+	     * sure we have a zero byte at the end.
+	     */
+	    strncpy(tmpsym, ls->l_name, SYMNMLEN);
+	    tmpsym[SYMNMLEN] = '\0';
+	    symname = tmpsym;
+	}
+	ep->name = strdup(symname);
+	ep->addr = (void *) ((unsigned long) dataorg +
+			     ls->l_value - shdata.s_vaddr);
+	ep++;
     }
     free(ldbuf);
     while (ldclose(ldp) == FAILURE);
@@ -678,27 +678,27 @@ static void *findMain(void)
     void *ret;
 
     if ((buf = malloc(size)) == NULL) {
-    errvalid++;
-    strcpy(errbuf, "findMain: ");
-    strcat(errbuf, strerror(errno));
-    return NULL;
+	errvalid++;
+	strcpy(errbuf, "findMain: ");
+	strcat(errbuf, strerror(errno));
+	return NULL;
     }
     while ((i = loadquery(L_GETINFO, buf, size)) == -1 && errno == ENOMEM) {
-    free(buf);
-    size += 4 * 1024;
-    if ((buf = malloc(size)) == NULL) {
-        errvalid++;
-        strcpy(errbuf, "findMain: ");
-        strcat(errbuf, strerror(errno));
-        return NULL;
-    }
+	free(buf);
+	size += 4 * 1024;
+	if ((buf = malloc(size)) == NULL) {
+	    errvalid++;
+	    strcpy(errbuf, "findMain: ");
+	    strcat(errbuf, strerror(errno));
+	    return NULL;
+	}
     }
     if (i == -1) {
-    errvalid++;
-    strcpy(errbuf, "findMain: ");
-    strcat(errbuf, strerror(errno));
-    free(buf);
-    return NULL;
+	errvalid++;
+	strcpy(errbuf, "findMain: ");
+	strcat(errbuf, strerror(errno));
+	free(buf);
+	return NULL;
     }
     /*
      * The first entry is the main module. The data segment

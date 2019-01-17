@@ -45,7 +45,7 @@ typedef int apr_status_t;
 
 /**
  * Return a human readable string describing the specified error.
- * @param statcode The error code the get a string for.
+ * @param statcode The error code to get a string for.
  * @param buf A buffer to hold the error string.
  * @param bufsize Size of the buffer to hold the string.
  */
@@ -126,7 +126,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * use within apr-util. This space is reserved above that used by APR
  * internally.
  * @note This number MUST be smaller than APR_OS_ERRSPACE_SIZE by a
- *       large enough amount that APR has sufficient room for it's
+ *       large enough amount that APR has sufficient room for its
  *       codes.
  */
 #define APR_UTIL_ERRSPACE_SIZE 20000
@@ -135,7 +135,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  */
 #define APR_OS_START_STATUS    (APR_OS_START_ERROR + APR_OS_ERRSPACE_SIZE)
 /**
- * APR_UTIL_START_STATUS is where APR-Util starts defining it's
+ * APR_UTIL_START_STATUS is where APR-Util starts defining its
  * status codes.
  */
 #define APR_UTIL_START_STATUS   (APR_OS_START_STATUS + \
@@ -158,6 +158,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * Subversion - Defined ranges, of less than 100, at intervals of 5000
  *              starting at an offset of 5000, e.g.
  *               +5000 to 5100,  +10000 to 10100
+ *
+ * Apache HTTPD - +2000 to 2999
  */
 #define APR_OS_START_USERERR    (APR_OS_START_STATUS + APR_OS_ERRSPACE_SIZE)
 /**
@@ -831,6 +833,20 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_EAFNOSUPPORT  (APR_OS_START_CANONERR + 27)
 #endif
 
+/** @see APR_STATUS_IS_EOPNOTSUPP */
+#ifdef EOPNOTSUPP
+#define APR_EOPNOTSUPP EOPNOTSUPP
+#else
+#define APR_EOPNOTSUPP    (APR_OS_START_CANONERR + 28)
+#endif
+
+/** @see APR_STATUS_IS_ERANGE */
+#ifdef ERANGE
+#define APR_ERANGE ERANGE
+#else
+#define APR_ERANGE          (APR_OS_START_CANONERR + 29)
+#endif
+
 /** @} */
 
 #if defined(OS2) && !defined(DOXYGEN)
@@ -975,6 +991,9 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + ERROR_ACCESS_DENIED)
 #define APR_STATUS_IS_EAFNOSUPPORT(s)   ((s) == APR_AFNOSUPPORT \
                 || (s) == APR_OS_START_SYSERR + SOCEAFNOSUPPORT)
+#define APR_STATUS_IS_EOPNOTSUPP(s)     ((s) == APR_EOPNOTSUPP \
+                || (s) == APR_OS_START_SYSERR + SOCEOPNOTSUPP)
+#define APR_STATUS_IS_ERANGE(s)         ((s) == APR_ERANGE)
 
 /*
     Sorry, too tired to wrap this up for OS2... feel free to
@@ -988,7 +1007,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
     { SOCENOPROTOOPT,           ENOPROTOOPT     },
     { SOCEPROTONOSUPPORT,       EPROTONOSUPPORT },
     { SOCESOCKTNOSUPPORT,       ESOCKTNOSUPPORT },
-    { SOCEOPNOTSUPP,            EOPNOTSUPP      },
     { SOCEPFNOSUPPORT,          EPFNOSUPPORT    },
     { SOCEADDRINUSE,            EADDRINUSE      },
     { SOCEADDRNOTAVAIL,         EADDRNOTAVAIL   },
@@ -1120,6 +1138,9 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + ERROR_DIR_NOT_EMPTY)
 #define APR_STATUS_IS_EAFNOSUPPORT(s)   ((s) == APR_EAFNOSUPPORT \
                 || (s) == APR_OS_START_SYSERR + WSAEAFNOSUPPORT)
+#define APR_STATUS_IS_EOPNOTSUPP(s)     ((s) == APR_EOPNOTSUPP \
+                || (s) == APR_OS_START_SYSERR + WSAEOPNOTSUPP)
+#define APR_STATUS_IS_ERANGE(s)         ((s) == APR_ERANGE)
 
 #elif defined(NETWARE) && defined(USE_WINSOCK) && !defined(DOXYGEN) /* !defined(OS2) && !defined(WIN32) */
 
@@ -1181,6 +1202,9 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ENOTEMPTY(s)      ((s) == APR_ENOTEMPTY)
 #define APR_STATUS_IS_EAFNOSUPPORT(s)   ((s) == APR_EAFNOSUPPORT \
                 || (s) == APR_OS_START_SYSERR + WSAEAFNOSUPPORT)
+#define APR_STATUS_IS_EOPNOTSUPP(s)     ((s) == APR_EOPNOTSUPP \
+                || (s) == APR_OS_START_SYSERR + WSAEOPNOTSUPP)
+#define APR_STATUS_IS_ERANGE(s)         ((s) == APR_ERANGE)
 
 #else /* !defined(NETWARE) && !defined(OS2) && !defined(WIN32) */
 
@@ -1289,7 +1313,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EHOSTUNREACH(s)    ((s) == APR_EHOSTUNREACH)
 /** network is unreachable */
 #define APR_STATUS_IS_ENETUNREACH(s)     ((s) == APR_ENETUNREACH)
-/** inappropiate file type or format */
+/** inappropriate file type or format */
 #define APR_STATUS_IS_EFTYPE(s)          ((s) == APR_EFTYPE)
 /** broken pipe */
 #define APR_STATUS_IS_EPIPE(s)           ((s) == APR_EPIPE)
@@ -1300,6 +1324,11 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                                           (s) == APR_EEXIST)
 /** Address Family not supported */
 #define APR_STATUS_IS_EAFNOSUPPORT(s)    ((s) == APR_EAFNOSUPPORT)
+/** Socket operation not supported */
+#define APR_STATUS_IS_EOPNOTSUPP(s)      ((s) == APR_EOPNOTSUPP)
+
+/** Numeric value not representable */
+#define APR_STATUS_IS_ERANGE(s)         ((s) == APR_ERANGE)
 /** @} */
 
 #endif /* !defined(NETWARE) && !defined(OS2) && !defined(WIN32) */

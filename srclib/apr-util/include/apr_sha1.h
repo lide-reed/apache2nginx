@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 /* NIST Secure Hash Algorithm
- *     heavily modified by Uwe Hollerbach uh@alumni.caltech edu
- *     from Peter C. Gutmann's implementation as found in
- *     Applied Cryptography by Bruce Schneier
- *     This code is hereby placed in the public domain
+ * 	heavily modified by Uwe Hollerbach uh@alumni.caltech edu
+ * 	from Peter C. Gutmann's implementation as found in
+ * 	Applied Cryptography by Bruce Schneier
+ * 	This code is hereby placed in the public domain
  */
 
 #ifndef APR_SHA1_H
@@ -118,4 +118,4 @@ APU_DECLARE(void) apr_sha1_final(unsigned char digest[APR_SHA1_DIGESTSIZE],
 }
 #endif
 
-#endif    /* APR_SHA1_H */
+#endif	/* APR_SHA1_H */

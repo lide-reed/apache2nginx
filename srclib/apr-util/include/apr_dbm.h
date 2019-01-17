@@ -224,4 +224,4 @@ APU_DECLARE(void) apr_dbm_get_usednames(apr_pool_t *pool,
 }
 #endif
 
-#endif    /* !APR_DBM_H */
+#endif	/* !APR_DBM_H */

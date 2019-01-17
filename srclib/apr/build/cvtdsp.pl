@@ -34,6 +34,12 @@ elsif ($ARGV[0] eq '-m') {
         $name = "apr";
         onemake();
 }
+elsif ($ARGV[0] eq '-ossl11') {
+    find(\&toossl1, '.');
+}
+elsif ($ARGV[0] eq '-apr16') {
+    find(\&toapr16, '.');
+}
 else {
     print "Specify -5 or -6 for Visual Studio 5 or 6 (98) .dsp format\n";
     print "Specify -w3 or -w4 for .dsp build with warning level 3 or 4 (strict)\n\n";
@@ -223,7 +229,75 @@ sub tovc2005 {
     }
 }
 
-sub tow3 { 
+sub toossl1 {
+
+    if (m|\.dsp$| || m|\.dsw$|) {
+        $oname = $_;
+        $tname = '.#' . $_;
+        $verchg = 0;
+        $srcfl = new IO::File $_, "r" || die;
+        $dstfl = new IO::File $tname, "w" || die;
+        while ($src = <$srcfl>) {
+            if ($src =~ s|inc32\"|include\" /I \"../../srclib/openssl/ms\"|) {
+                $verchg = -1;
+            }
+            if ($src =~ s|libeay32|libcrypto|) {
+                $verchg = -1;
+            }
+            if ($src =~ s|ssleay32|libssl|) {
+                $verchg = -1;
+            }
+            if ($src =~ s|(\\\|/)?out32dll||) {
+                $verchg = -1;
+            }
+            # we must have apr-1.6+ to build with OpenSSL 1.1.0
+            # deal with the moving of xml.mak
+            if ($src =~ s|xml\\expat\\lib\\xml|xml\\xml|) {
+                $verchg = -1;
+            }
+            print $dstfl $src;
+        }
+        undef $srcfl;
+        undef $dstfl;
+        if ($verchg) {
+            unlink $oname || die;
+            rename $tname, $oname || die;
+            print "Converted project " . $oname . " to OpenSSL 1.1.0 in " . $File::Find::dir . "\n";
+        }
+        else {
+            unlink $tname;
+        }
+    }
+}
+
+sub toapr16 {
+
+    if (m|\.dsw$|) {
+        $oname = $_;
+        $tname = '.#' . $_;
+        $verchg = 0;
+        $srcfl = new IO::File $_, "r" || die;
+        $dstfl = new IO::File $tname, "w" || die;
+        while ($src = <$srcfl>) {
+            if ($src =~ s|xml\\expat\\lib\\xml|xml\\xml|) {
+                $verchg = -1;
+            }
+            print $dstfl $src;
+        }
+        undef $srcfl;
+        undef $dstfl;
+        if ($verchg) {
+            unlink $oname || die;
+            rename $tname, $oname || die;
+            print "Converted project " . $oname . " to OpenSSL 1.1.0 in " . $File::Find::dir . "\n";
+        }
+        else {
+            unlink $tname;
+        }
+    }
+}
+
+sub tow3 {
 
     if (m|\.dsp$| || m|\.mak$|) {
         $oname = $_;

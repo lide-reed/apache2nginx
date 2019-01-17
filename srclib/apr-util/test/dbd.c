@@ -20,15 +20,15 @@
 
 #include <stdio.h>
 
-#define TEST(msg,func)                    \
-    printf("======== %s ========\n", msg);        \
-    rv = func(pool, sql, driver);            \
-    if (rv != 0) {                    \
-        printf("Error in %s: rc=%d\n\n", msg, rv);    \
-    }                            \
-    else {                        \
-        printf("%s test successful\n\n", msg);        \
-    }                            \
+#define TEST(msg,func)					\
+    printf("======== %s ========\n", msg);		\
+    rv = func(pool, sql, driver);			\
+    if (rv != 0) {					\
+        printf("Error in %s: rc=%d\n\n", msg, rv);	\
+    }							\
+    else {						\
+        printf("%s test successful\n\n", msg);		\
+    }							\
     fflush(stdout);
 
 static int create_table(apr_pool_t* pool, apr_dbd_t* handle,
@@ -122,17 +122,17 @@ static int select_sequential(apr_pool_t* pool, apr_dbd_t* handle,
     for (rv = apr_dbd_get_row(driver, pool, res, &row, -1);
          rv == 0;
          rv = apr_dbd_get_row(driver, pool, res, &row, -1)) {
-        printf("ROW %d:    ", ++i) ;
+        printf("ROW %d:	", ++i) ;
         for (n = 0; n < apr_dbd_num_cols(driver, res); ++n) {
             entry = apr_dbd_get_entry(driver, row, n);
             if (entry == NULL) {
-                printf("(null)    ") ;
+                printf("(null)	") ;
             }
             else {
-                printf("%s    ", entry);
+                printf("%s	", entry);
             }
         }
-    fputs("\n", stdout);
+	fputs("\n", stdout);
     }
     return (rv == -1) ? 0 : 1;
 }
@@ -155,14 +155,14 @@ static int select_random(apr_pool_t* pool, apr_dbd_t* handle,
         printf("get_row failed: %s", apr_dbd_error(driver, handle, rv));
         return rv;
     }
-    printf("ROW 5:    ");
+    printf("ROW 5:	");
     for (n = 0; n < apr_dbd_num_cols(driver, res); ++n) {
         entry = apr_dbd_get_entry(driver, row, n);
         if (entry == NULL) {
-            printf("(null)    ") ;
+            printf("(null)	") ;
         }
         else {
-            printf("%s    ", entry);
+            printf("%s	", entry);
         }
     }
     fputs("\n", stdout);
@@ -171,14 +171,14 @@ static int select_random(apr_pool_t* pool, apr_dbd_t* handle,
         printf("get_row failed: %s", apr_dbd_error(driver, handle, rv));
         return rv;
     }
-    printf("ROW 1:    ");
+    printf("ROW 1:	");
     for (n = 0; n < apr_dbd_num_cols(driver, res); ++n) {
         entry = apr_dbd_get_entry(driver, row, n);
         if (entry == NULL) {
-            printf("(null)    ") ;
+            printf("(null)	") ;
         }
         else {
-            printf("%s    ", entry);
+            printf("%s	", entry);
         }
     }
     fputs("\n", stdout);
@@ -295,17 +295,17 @@ static int test_pselect(apr_pool_t* pool, apr_dbd_t* handle,
     for (rv = apr_dbd_get_row(driver, pool, res, &row, -1);
          rv == 0;
          rv = apr_dbd_get_row(driver, pool, res, &row, -1)) {
-        printf("ROW %d:    ", ++i) ;
+        printf("ROW %d:	", ++i) ;
         for (n = 0; n < apr_dbd_num_cols(driver, res); ++n) {
             entry = apr_dbd_get_entry(driver, row, n);
             if (entry == NULL) {
-                printf("(null)    ") ;
+                printf("(null)	") ;
             }
             else {
-                printf("%s    ", entry);
+                printf("%s	", entry);
             }
         }
-    fputs("\n", stdout);
+	fputs("\n", stdout);
     }
     return (rv == -1) ? 0 : 1;
 }

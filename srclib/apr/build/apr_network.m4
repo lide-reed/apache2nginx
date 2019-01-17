@@ -64,7 +64,7 @@ AC_DEFUN([APR_CHECK_WORKING_GETADDRINFO], [
 #include <sys/socket.h>
 #endif
 
-void main(void) {
+int main(void) {
     struct addrinfo hints, *ai;
     int error;
 
@@ -152,7 +152,7 @@ AC_DEFUN([APR_CHECK_WORKING_GETNAMEINFO], [
 #include <netinet/in.h>
 #endif
 
-void main(void) {
+int main(void) {
     struct sockaddr_in sa;
     char hbuf[256];
     int error;
@@ -195,7 +195,7 @@ AC_DEFUN([APR_CHECK_NEGATIVE_EAI], [
 #include <netdb.h>
 #endif
 
-void main(void) {
+int main(void) {
     if (EAI_ADDRFAMILY < 0) {
         exit(0);
     }
@@ -555,12 +555,26 @@ dnl
 AC_DEFUN([APR_CHECK_O_NONBLOCK_INHERITED], [
   AC_CACHE_CHECK(if O_NONBLOCK setting is inherited from listening sockets, ac_cv_o_nonblock_inherited,[
   AC_TRY_RUN( [
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_STDIO_H
 #include <stdio.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -579,6 +593,8 @@ int main(void) {
     int listen_port, rc;
     struct sockaddr_in sa;
     socklen_t sa_len;
+    fd_set fds;
+    struct timeval tv;
 
     listen_s = socket(AF_INET, SOCK_STREAM, 0);
     if (listen_s < 0) {
@@ -632,6 +648,26 @@ int main(void) {
         exit(1);
     }
     sa_len = sizeof sa;
+    /* 1 second select timeout */
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+    /* Set up fd set */
+    FD_ZERO(&fds);
+    FD_SET(listen_s, &fds);
+    /* Wait for socket to become readable */
+    rc = select(listen_s + 1, &fds, NULL, NULL, &tv);
+    if (rc < 0) {
+        perror("select");
+        exit(1);
+    }
+    if (rc == 0) {
+        fprintf(stderr, "Socket failed to become readable (timeout)\n");
+        exit(1);
+    }
+    if (!FD_ISSET(listen_s, &fds)) {
+        fprintf(stderr, "Socket failed to become readable (selected another fd)\n");
+        exit(1);
+    }
     connected_s = accept(listen_s, (struct sockaddr *)&sa, &sa_len);
     if (connected_s < 0) {
         perror("accept");
@@ -786,6 +822,36 @@ if test "$ac_cv_define_sockaddr_in6" = "yes"; then
 else
   have_sockaddr_in6=0
 fi
+])
+
+dnl Check for presence of struct sockaddr_un.
+AC_DEFUN([APR_CHECK_SOCKADDR_UN], [
+AC_CACHE_CHECK(for sockaddr_un, ac_cv_define_sockaddr_un,[
+AC_TRY_COMPILE([
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_SYS_UN_H
+#include <sys/un.h>
+#endif
+],[
+struct sockaddr_un sa;
+],[
+    ac_cv_define_sockaddr_un=yes
+],[
+    ac_cv_define_sockaddr_un=no
+])
+])
+
+if test "$ac_cv_define_sockaddr_un" = "yes"; then
+  have_sockaddr_un=1
+else
+  have_sockaddr_un=0
+fi
+AC_SUBST(have_sockaddr_un)
 ])
 
 dnl

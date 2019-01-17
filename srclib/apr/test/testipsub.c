@@ -45,6 +45,7 @@ static void test_bad_input(abts_case *tc, void *data)
         ,{"127.0.0.1.2",       NULL,               APR_EBADIP}
         ,{"127.0.0.1.2",       "8",                APR_EBADIP}
         ,{"127",               "255.0.0.0",        APR_EBADIP} /* either EBADIP or EBADMASK seems fine */
+        ,{"",                  NULL,               APR_EINVAL}
 #if APR_HAVE_IPV6
         ,{"::1",               NULL,               APR_SUCCESS}
         ,{"::1",               "20",               APR_SUCCESS}
@@ -119,6 +120,7 @@ static void test_interesting_subnets(abts_case *tc, void *data)
         ,{"127",              NULL,            APR_INET,  "127.0.0.1",           "10.1.2.3"}
         ,{"127.0.0.1",        "8",             APR_INET,  "127.0.0.1",           "10.1.2.3"}
 #if APR_HAVE_IPV6
+        ,{"38.0.0.0",         "8",             APR_INET6, "::ffff:38.1.1.1",     "2600::1"} /* PR 54047 */
         ,{"fe80::",           "8",             APR_INET6, "fe80::1",             "ff01::1"}
         ,{"ff01::",           "8",             APR_INET6, "ff01::1",             "fe80::1"}
         ,{"3FFE:8160::",      "28",            APR_INET6, "3ffE:816e:abcd:1234::1", "3ffe:8170::1"}
@@ -163,6 +165,52 @@ static void test_badip_str(abts_case *tc, void *data)
                       "The specified IP address is invalid.");
 }
 
+static void test_parse_addr_port(abts_case *tc, void *data)
+{
+    const struct {
+        const char *input;
+        apr_status_t rv;
+        const char *addr, *scope_id;
+        apr_port_t port;
+    } *test, testcases[] = {
+        { "localhost:80", APR_SUCCESS, "localhost", NULL, 80 }
+        ,{ "www.example.com:8080", APR_SUCCESS, "www.example.com", NULL, 8080 }
+        ,{ "w:1", APR_SUCCESS, "w", NULL, 1 }
+        ,{ "127.0.0.1:80", APR_SUCCESS, "127.0.0.1", NULL, 80 }
+        ,{ "[::]:80", APR_SUCCESS, "::", NULL, 80 }
+        ,{ "localhost:999999", APR_EINVAL, NULL, NULL, 0 }
+        ,{ "localhost:0", APR_EINVAL, NULL, NULL, 0 }
+        ,{ "[::]z:80", APR_EINVAL, NULL, NULL, 0 }
+        ,{ "[:::80", APR_EINVAL, NULL, NULL, 0 }
+        ,{ "[zzzz]:80", APR_EINVAL, NULL, NULL, 0 }
+        ,{ "[::%]:80", APR_EINVAL, NULL, NULL, 0 }
+        ,{ "[::%eth0]:80", APR_SUCCESS, "::", "eth0", 80 }
+/*        ,{ "127.0.0.1:80x", APR_EINVAL, NULL, NULL, 0 }  <- should fail, doesn't  */
+/*        ,{ "127.0.0.1x:80", APR_EINVAL, NULL, NULL, 0 }  <- maybe should fail?, doesn't  */
+/*        ,{ "localhost:-1", APR_EINVAL, NULL, NULL, 0 }   <- should fail, doesn't */
+    };
+    unsigned i;
+        
+    for (i = 0; i < (sizeof testcases / sizeof testcases[0]); i++) {
+        char *addr, *scope_id;
+        apr_port_t port;
+        apr_status_t rv;
+
+        test = &testcases[i];
+        
+        rv = apr_parse_addr_port(&addr, &scope_id, &port, test->input, p);
+        ABTS_INT_EQUAL(tc, test->rv, rv);
+
+        if (test->rv != APR_SUCCESS) continue;
+
+        APR_ASSERT_SUCCESS(tc, "parse address", test->rv);
+
+        ABTS_STR_EQUAL(tc, test->addr, addr);
+        ABTS_STR_EQUAL(tc, test->scope_id, scope_id);
+        ABTS_INT_EQUAL(tc, test->port, port);
+    }
+}
+
 abts_suite *testipsub(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -172,6 +220,7 @@ abts_suite *testipsub(abts_suite *suite)
     abts_run_test(suite, test_interesting_subnets, NULL);
     abts_run_test(suite, test_badmask_str, NULL);
     abts_run_test(suite, test_badip_str, NULL);
+    abts_run_test(suite, test_parse_addr_port, NULL);
     return suite;
 }
 

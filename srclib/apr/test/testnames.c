@@ -195,7 +195,7 @@ static void merge_lowercasedrive(abts_case *tc, void *data)
 
    /* 3 stands for drive C: */
   ABTS_PTR_NOTNULL(tc, _getdcwd(3, current_dir_on_C,
-                                sizeof(current_dir_on_C)));
+	                            sizeof(current_dir_on_C)));
 
   /* Use the same path, but now with a lower case driveletter */
   dir_on_c = apr_pstrdup(p, current_dir_on_C);
@@ -213,6 +213,39 @@ static void merge_lowercasedrive(abts_case *tc, void *data)
   chdir(current_dir); /* Switch back to original cwd */
 
   ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+}
+
+static void merge_shortname(abts_case *tc, void *data)
+{
+  apr_status_t rv;
+  char *long_path;
+  char short_path[MAX_PATH+1];
+  DWORD short_len;
+  char *result_path;
+
+  /* 'A b.c' is not a valid short path, so will have multiple representations
+     when short path name generation is enabled... but its 'short' path will
+     most likely be longer than the long path */
+  rv = apr_dir_make_recursive("C:/data/short/A b.c",
+                              APR_UREAD | APR_UWRITE | APR_UEXECUTE, p);
+  ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+  rv = apr_filepath_merge(&long_path, NULL, "C:/data/short/A b.c",
+                          APR_FILEPATH_NOTRELATIVE, p);
+  ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+  short_len = GetShortPathName(long_path, short_path, sizeof(short_path));
+  if (short_len > MAX_PATH)
+    return; /* Unable to test. Impossible shortname */
+
+  if (! strcmp(long_path, short_path))
+    return; /* Unable to test. 8dot3name option is probably not enabled */
+
+  rv = apr_filepath_merge(&result_path, "", short_path, APR_FILEPATH_TRUENAME,
+                          p);
+  ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+
+  ABTS_STR_EQUAL(tc, long_path, result_path);
 }
 #endif
 
@@ -269,7 +302,9 @@ static void root_from_cwd_and_back(abts_case *tc, void *data)
     const char *path = "//";
     char *origpath;
     char *testpath;
+#if defined(WIN32) || defined(OS2) || defined(NETWARE)
     int hadfailed;
+#endif
 
     ABTS_INT_EQUAL(tc, APR_SUCCESS, apr_filepath_get(&origpath, 0, p));
     path = origpath;
@@ -308,7 +343,9 @@ static void root_from_cwd_and_back(abts_case *tc, void *data)
                           | APR_FILEPATH_NOTABOVEROOT
                           | APR_FILEPATH_NOTRELATIVE, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+#if defined(WIN32) || defined(OS2) || defined(NETWARE)
     hadfailed = tc->failed;
+#endif
     /* The API doesn't promise equality!!! 
      * apr_filepath_get never promised a canonical filepath.
      * We'll emit noise under verbose so the user is aware,
@@ -337,6 +374,7 @@ abts_suite *testnames(abts_suite *suite)
     abts_run_test(suite, merge_dotdot_dotdot_dotdot, NULL);
 #if defined(WIN32)
     abts_run_test(suite, merge_lowercasedrive, NULL);
+    abts_run_test(suite, merge_shortname, NULL);
 #endif
 
     abts_run_test(suite, root_absolute, NULL);

@@ -36,7 +36,7 @@ static apr_status_t apr_netware_proc_cleanup(void *theproc)
         waitpid(proc->pid, &exit_int, waitpid_options);
     }
 
-/*    NXVmDestroy(proc->pid); */
+/*	NXVmDestroy(proc->pid); */
     return APR_SUCCESS;
 }
 
@@ -307,11 +307,11 @@ APR_DECLARE(apr_status_t) apr_procattr_addrspace_set(apr_procattr_t *attr,
 }
 
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
-                                    const char *progname, 
-                                    const char * const *args, 
-                                    const char * const *env,
-                                      apr_procattr_t *attr, 
-                                      apr_pool_t *pool)
+									const char *progname, 
+									const char * const *args, 
+									const char * const *env,
+                              		apr_procattr_t *attr, 
+                              		apr_pool_t *pool)
 {
     wiring_t wire;
     int      addr_space;
@@ -504,4 +504,12 @@ APR_DECLARE(apr_status_t) apr_procattr_group_set(apr_procattr_t *attr,
 {
     /* Always return SUCCESS because NetWare threads don't run within a group */
     return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_procattr_perms_set_register(apr_procattr_t *attr,
+                                                 apr_perms_setfn_t *perms_set_fn,
+                                                 void *data,
+                                                 apr_fileperms_t perms)
+{
+    return APR_ENOTIMPL;
 }

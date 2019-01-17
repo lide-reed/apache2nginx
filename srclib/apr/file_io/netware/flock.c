@@ -20,12 +20,12 @@
 
 apr_status_t apr_file_lock(apr_file_t *thefile, int type)
 {
-    int fc;
+	int fc;
 
-    fc = (type & APR_FLOCK_NONBLOCK) ? NX_RANGE_LOCK_TRYLOCK : NX_RANGE_LOCK_CHECK;
+	fc = (type & APR_FLOCK_NONBLOCK) ? NX_RANGE_LOCK_TRYLOCK : NX_RANGE_LOCK_CHECK;
 
     if(NXFileRangeLock(thefile->filedes,fc, 0, 0) == -1)
-        return errno;
+		return errno;
             
     return APR_SUCCESS;
 }
@@ -33,7 +33,7 @@ apr_status_t apr_file_lock(apr_file_t *thefile, int type)
 apr_status_t apr_file_unlock(apr_file_t *thefile)
 {
     if(NXFileRangeUnlock(thefile->filedes,NX_RANGE_LOCK_CANCEL,0 , 0) == -1)
-        return errno;
+		return errno;
    
     return APR_SUCCESS;
 }
